@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeApp — Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── SIDEBAR ───────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="logo">Life<em>App</em></div>
+    <nav>
+      <ul>
+        <li class="active">
+          <a href="#" data-page="dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+        </li>
+        <li>
+          <a href="quizzes.html"><i class="fas fa-compass"></i> <span>Quizzes</span></a>
+        </li>
+        <li>
+          <a href="#" data-page="journal"><i class="fas fa-feather-alt"></i> <span>Journal</span></a>
+        </li>
+        <li>
+          <a href="#" data-page="progress"><i class="fas fa-chart-line"></i> <span>Progress</span></a>
+        </li>
+        <li class="dropdown">
+          <a href="#"><i class="fas fa-ellipsis-h"></i> <span>More</span></a>
+          <ul class="dropdown-content">
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Help</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ── MAIN ──────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- DASHBOARD ─────────────────────────────── -->
+    <div id="dashboard" class="page active">
+      <div class="page-header">
+        <h1>Good <em id="timeGreet">morning</em></h1>
+        <p>Here's where you stand today. Check in, reflect, grow.</p>
+      </div>
+
+      <!-- Row 1: Stats + Mood + Affirmation -->
+      <div class="grid-dash" style="margin-bottom:20px;">
+
+        <!-- STAT CARDS -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div class="card">
+            <div class="stat-label">Active Streak</div>
+            <div class="stat-value" id="streakVal">0 <small>days</small></div>
+            <div class="streak-badge" id="streakBadge">🔥 Keep it going</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Journal Entries</div>
+            <div class="stat-value" id="journalCount">0</div>
+            <div class="stat-sub" id="lastJournalDate">No entries yet</div>
+          </div>
+        </div>
+
+        <!-- MOOD CHECK-IN -->
+        <div class="card">
+          <div class="card-title">Today's Check-in</div>
+          <p style="font-size:14px;color:var(--muted);font-weight:300;">How are you showing up right now?</p>
+          <div class="mood-options">
+            <button class="mood-btn" data-mood="Thriving"  data-emoji="✨"><span class="em">✨</span>Thriving</button>
+            <button class="mood-btn" data-mood="Good"      data-emoji="😊"><span class="em">😊</span>Good</button>
+            <button class="mood-btn" data-mood="Okay"      data-emoji="😐"><span class="em">😐</span>Okay</button>
+            <button class="mood-btn" data-mood="Low"       data-emoji="😔"><span class="em">😔</span>Low</button>
+            <button class="mood-btn" data-mood="Struggling" data-emoji="🌧️"><span class="em">🌧️</span>Struggling</button>
+          </div>
+          <div id="moodSavedMsg" style="display:none;margin-top:12px;font-size:13px;color:var(--teal);">
+            ✓ Logged. <span id="moodSavedEmoji"></span>
+          </div>
+        </div>
+
+        <!-- AFFIRMATION -->
+        <div class="affirmation-card">
+          <div class="card-title" style="text-align:center;margin-bottom:14px;">Daily Insight</div>
+          <div class="affirmation-text" id="affirmationText">Loading…</div>
+          <div class="affirmation-sub">Tap to refresh</div>
+          <button onclick="rotateAffirmation()" style="
+            margin-top:14px;background:rgba(0, 0, 0, 0.12);
+            border:1px solid rgba(0, 0, 0, 0.25);color:var(--pri-lt);
+            padding:7px 14px;border-radius:99px;cursor:pointer;
+            font-size:12px;font-family:'Outfit',sans-serif;letter-spacing:.06em;
+            transition:all .2s;
+          ">↺ New insight</button>
+        </div>
+      </div>
+
+      <!-- Row 2: Domain Scores + Quick Actions + Recent Journal -->
+      <div class="grid-3">
+        <!-- QUICK ACTIONS -->
+        <div class="card">
+          <div class="card-title">Quick Actions</div>
+          <a class="quick-action" href="quizzes.html">
+            <div class="qa-icon">🧭</div>
+            <div class="qa-text">
+              <h4>Take a Quiz</h4>
+              <p>Explore your 5 life domains</p>
+            </div>
+          </a>
+          <a class="quick-action" href="#" data-page="journal" onclick="showPageFromLink(event,'journal')">
+            <div class="qa-icon">📝</div>
+            <div class="qa-text">
+              <h4>Write in Journal</h4>
+              <p>Reflect on your day</p>
+            </div>
+          </a>
+          <a class="quick-action" href="#" onclick="showPageFromLink(event,'progress')">
+            <div class="qa-icon">📊</div>
+            <div class="qa-text">
+              <h4>View Progress</h4>
+              <p>Your history & entries</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- RECENT JOURNAL -->
+        <div class="card">
+          <div class="card-title">Recent Journal</div>
+          <div class="journal-preview" id="recentJournalList">
+            <p class="jp-empty">Your journal entries will appear here.</p>
+          </div>
+          <div class="divider"></div>
+          <a href="#" onclick="showPageFromLink(event,'journal')" class="btn btn-ghost" style="font-size:12px;padding:7px 14px;">
+            + New Entry
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- JOURNAL ───────────────────────────────── -->
+    <div id="journal" class="page">
+      <div class="page-header">
+        <h1>My <em>Journal</em></h1>
+        <p>Write freely. This is your space.</p>
+      </div>
+      <div class="card" style="max-width:680px;">
+        <div class="card-title">New Entry</div>
+        <textarea class="journal-textarea" id="journalText" placeholder="What's on your mind today?"></textarea>
+        <button class="primary" id="saveJournalBtn">Save Entry</button>
+      </div>
+    </div>
+
+    <!-- PROGRESS ──────────────────────────────── -->
+    <div id="progress" class="page">
+      <div class="page-header">
+        <h1>Your <em>Progress</em></h1>
+        <p>A record of your reflections and check-ins.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">History</div>
+        <ul class="history-list" id="historyList">
+          <li style="border-left-color:var(--faint);color:var(--faint);font-style:italic;">
+            No history yet. Start by writing a journal entry.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

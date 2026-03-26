@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Quiz</title>
+<link rel="stylesheet" href="career.css">
+</head>
+
+<body>
+
+<div class="main-content">
+
+  <div class="page-header">
+    <h1>Quiz 4: Career</h1>
+    <p>Is Your Work Life Actually Working for You?</p>
+    <p>20 Questions · 4 Domains · Max Score: 80</p>
+  </div>
+
+  <div class="instructions">
+    <p>Select one answer per question.</p>
+    <p>A = 1 | B = 2 | C = 3 | D = 4</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="quiz-progress-outer">
+    <div class="quiz-progress-track">
+      <div class="quiz-progress-fill" id="quizProgress"></div>
+    </div>
+    <div class="quiz-progress-text" id="progressText">1 / 20</div>
+  </div>
+
+  <!-- Question -->
+  <div class="quiz-wrap">
+    <div class="question-card">
+      <div class="q-num">Question <span id="qNumber">1</span></div>
+      <div class="q-text" id="qText"></div>
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+
+    <!-- NAV BUTTONS -->
+    <div class="nav-buttons">
+      <button id="prevBtn" class="nav-btn">Previous</button>
+      <button id="nextBtn" class="nav-btn">Next</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-card" id="resultsCard" style="display:none;">
+    <h2 id="scoreText"></h2>
+    <div id="archetype"></div>
+    <div id="domainBreakdown"></div>
+
+    <p>Strongest Domain: <span id="strongDomain"></span></p>
+    <p>Needs Work: <span id="weakDomain"></span></p>
+  </div>
+
+</div>
+
+<script src="career.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Self-Awareness Quiz</title>
+<link rel="stylesheet" href="selfawareness.css">
+</head>
+<body class="quiz-page">
+
+<div class="main-content">
+  <div class="page-header">
+    <h1>Self-Awareness <em>Quiz</em></h1>
+    <p>How Well Do You Know Yourself?</p>
+    <p>20 Questions · 4 Domains · 4 Archetypes</p>
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions">
+    <p>Circle the ONE answer that best reflects how you genuinely think, feel, or behave.</p>
+    <p>Be honest — not aspirational. Your real answers give useful results.</p>
+    <p>Scoring: A = 1  |  B = 2  |  C = 3  |  D = 4  | Maximum score: 80</p>
+  </div>
+
+  <!-- Quiz Progress -->
+  <div class="quiz-progress-outer">
+    <div class="quiz-progress-track">
+      <div class="quiz-progress-fill" id="quizProgress"></div>
+      <span id="mickeyIcon">🐭</span>
+    </div>
+    <div class="quiz-progress-text" id="progressText">0 / 20</div>
+  </div>
+
+  <!-- Question Card -->
+  <div class="quiz-wrap">
+    <div class="question-card">
+      <div class="q-num">Question <span id="qNumber">1</span></div>
+      <div class="q-text" id="qText">Loading...</div>
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-card" id="resultsCard" style="display:none;">
+    <div class="results-score-ring">
+      <svg width="120" height="120">
+        <circle class="ring-bg" cx="60" cy="60" r="54"></circle>
+        <circle class="ring-fill" cx="60" cy="60" r="54" stroke-dasharray="339.292" stroke-dashoffset="339.292"></circle>
+      </svg>
+    </div>
+    <div class="results-label">Your Score</div>
+    <div class="results-archetype" id="archetype"></div>
+    <div class="domain-breakdown" id="domainBreakdown"></div>
+    <div class="reflection-notes">
+      <p>My strongest domain is: <span id="strongDomain"></span></p>
+      <p>The domain I most need to work on: <span id="weakDomain"></span></p>
+    </div>
+  </div>
+</div>
+
+<script src="selfawareness.js"></script>
+</body>
+</html>

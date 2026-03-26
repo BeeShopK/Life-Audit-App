@@ -1,0 +1,134 @@
+/* ===== GLOBAL STYLES ===== */
+body {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  color: var(--text);
+  background: #000; /* fallback black */
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Deep waveform-like crossfade background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 8% 95%,  rgba(0,0,0,0.2) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 55% at 92% 5%, rgba(20,0,35,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.5) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+  animation: waveformFade 12s ease-in-out infinite alternate;
+}
+
+@keyframes waveformFade {
+  0% {
+    background-position: 0% 50%, 50% 50%, 100% 50%;
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  50% {
+    background-position: 25% 55%, 55% 45%, 75% 55%;
+    opacity: 0.93;
+    transform: scale(1.02);
+  }
+  100% {
+    background-position: 50% 50%, 50% 50%, 50% 50%;
+    opacity: 1;
+    transform: scale(1.04);
+  
+}
+
+/* ===== HEADER ===== */
+header {
+  background-color: #333;
+  color: white;
+  padding: 15px;
+  text-align: center;
+}
+
+/* ===== NAVIGATION ===== */
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  background-color: #444;
+  padding: 10px;
+}
+
+nav button {
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+  background-color: #ddd;
+  transition: 0.3s;
+}
+
+nav button:hover {
+  background-color: #bbb;
+}
+
+nav button.active {
+  background-color: #2196f3;
+  color: white;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+  padding: 20px;
+}
+
+/* ===== CARD COMPONENT ===== */
+.card {
+  background-color: white;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* ===== INPUTS ===== */
+input,
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+/* ===== BUTTONS ===== */
+button {
+  font-size: 14px;
+}
+
+button.primary {
+  background-color: #2196f3;
+  color: white;
+  margin-top: 10px;
+}
+
+button.primary:hover {
+  background-color: #1976d2;
+}
+
+/* ===== LIST (PROGRESS PAGE) ===== */
+ul {
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 8px;
+}
+
+/* ===== PAGE VISIBILITY ===== */
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}

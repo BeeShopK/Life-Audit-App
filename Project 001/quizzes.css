@@ -1,0 +1,200 @@
+/* ===================== QUIZZES.CSS (UPDATED) ===================== */
+
+/* ===== RESET ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===== BODY ===== */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #121212;
+  color: #fff;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+}
+
+/* ===== BACK BUTTON ===== */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  background: linear-gradient(135deg, #555, #333);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease;
+}
+
+.back-btn:hover {
+  background: linear-gradient(135deg, #666, #444);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+.back-btn:active {
+  transform: scale(0.96);
+}
+
+/* ===== HOME BUTTON ===== */
+.home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #1a1a1a;
+  background: linear-gradient(135deg, #FFD700, #D4AF37);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.home-btn:hover {
+  background: linear-gradient(135deg, #ffdf4d, #c89b2c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* ===== HEADER TEXT ===== */
+.header-left h1 {
+  font-size: 24px;
+}
+
+.header-left .subtitle {
+  font-size: 14px;
+  color: #b3b3b3;
+  margin-top: 4px;
+}
+
+/* ===== QUIZ GRID ===== */
+.quiz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+  padding: 20px 0;
+}
+
+/* ===== BLUR EFFECT (FIXED) ===== */
+/* When hovering the grid, dim all cards */
+.quiz-grid:hover .quiz-card {
+  filter: blur(2px) brightness(0.6);
+  transform: scale(0.97);
+}
+
+/* When hovering a specific card, override blur */
+.quiz-grid .quiz-card:hover {
+  filter: none;
+  transform: translateY(-10px) scale(1.08);
+  z-index: 5;
+  box-shadow: 0 25px 60px rgba(29, 185, 84, 0.35);
+  border: 1px solid #1ed760;
+}
+
+/* ===== QUIZ CARD ===== */
+.quiz-card {
+  background: rgba(24, 24, 24, 0.95);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+
+  /* smooth fade + scale */
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+  animation: fadeInUp 0.6s ease forwards;
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* stagger animation */
+.quiz-card:nth-child(1) { animation-delay: 0.05s; }
+.quiz-card:nth-child(2) { animation-delay: 0.1s; }
+.quiz-card:nth-child(3) { animation-delay: 0.15s; }
+.quiz-card:nth-child(4) { animation-delay: 0.2s; }
+.quiz-card:nth-child(5) { animation-delay: 0.25s; }
+
+/* ===== ICON ===== */
+.quiz-icon {
+  font-size: 36px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(29, 185, 84, 0.08);
+  border-radius: 12px;
+}
+
+/* ===== TEXT ===== */
+.quiz-card h2 {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.quiz-card p {
+  font-size: 13px;
+  color: #b3b3b3;
+}
+
+.quiz-time {
+  font-size: 11px;
+  color: #666;
+  margin-top: auto;
+}
+
+/* ===== SECTION TITLE ===== */
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 24px 0 12px;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .quiz-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .quiz-card {
+    padding: 12px;
+  }
+}

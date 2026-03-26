@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mental Wellbeing Quiz</title>
+
+<link rel="stylesheet" href="mental-wellbeing.css">
+</head>
+<body>
+
+<div class="quiz-wrap">
+
+  <div class="header">
+    <h1>Mental Wellbeing</h1>
+    <p>How well are you taking care of your mind?</p>
+  </div>
+
+  <div id="progress">Question <span id="qNumber"></span> / 20</div>
+
+  <div id="qText" class="question"></div>
+
+  <div id="optionsGrid" class="options-grid"></div>
+
+  <div class="nav">
+    <button id="prevBtn">Previous</button>
+    <button id="nextBtn">Next</button>
+  </div>
+
+</div>
+
+<div id="resultsCard" class="results" style="display:none;">
+  <h2>Your Results</h2>
+  <p id="totalScore"></p>
+  <div id="breakdown"></div>
+  <div id="archetype"></div>
+</div>
+
+<script src="mental-wellbeing.js"></script>
+</body>
+</html>

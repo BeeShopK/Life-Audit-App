@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Self-Awareness Quiz</title>
+<link rel="stylesheet" href="selfawareness.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="quiz-page">
+
+<div class="main-content">
+
+      
+    
+      <div class="header-right">
+        <a href="quizzes.html" class="back-btn" title="Quizzes Dashboard">
+          <i class="fas fa-arrow-left"></i>
+          <span>Back</span>
+        </a>
+  </div>
+  
+  <header class="page-header">
+    <h1>Self - Awareness <em>Quiz</em></h1>
+    <p>How Well Do You Know Yourself?</p>
+    <p>20 Questions · 4 Domains · 4 Archetypes</p>
+  </header>
+
+<!-- Instructions -->
+  <section class="instructions">
+    <p>Click one or more choices that best reflects how you genuinely think or behave.</p>
+    <p>Be honest — not aspirational. Your real answers give useful results.</p>
+   
+  </section>
+
+  <!-- Quiz Progress -->
+  <section class="quiz-progress-outer">
+    <div class="quiz-progress-track">
+      <div class="quiz-progress-fill" id="quizProgress"></div>
+       <span id="mickeyIcon">🐭</span>
+    </div>
+    <div class="quiz-progress-text" id="progressText">0 / 20</div>
+  </section>
+
+  <!-- Question Card -->
+  <main class="quiz-wrap">
+
+
+
+    <div class="question-card">
+      <div class="q-num">Question <span id="qNumber">1</span></div>
+      <div class="q-text" id="qText">Loading...</div>
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+  <div class="results-card" id="resultsCard">
+  </main>
+
+  <!-- Results -->
+  <section class="results-card" id="resultsCard">
+
+    <div class="results-score-ring">
+      <svg width="120" height="120">
+        <circle class="ring-bg" cx="60" cy="60" r="54"></circle>
+        <circle class="ring-fill" cx="60" cy="60" r="54"></circle>
+      </svg>
+      <div class="ring-score" id="finalScore">0<small>%</small></div>
+    </div>
+
+    <div class="results-label">Your Score</div>
+    <div class="results-archetype" id="archetype"></div>
+
+    <div class="domain-breakdown" id="domainBreakdown"></div>
+
+    <div class="reflection-notes">
+      <p><strong>Strongest domain:</strong> <span id="strongDomain"></span></p>
+      <p><strong>Needs improvement:</strong> <span id="weakDomain"></span></p>
+    </div>
+</div>
+
+<script src="mirror-test.js"></script>
+</body>
+</html>

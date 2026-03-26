@@ -1,0 +1,12 @@
+// NAVIGATE TO QUIZ
+document.querySelectorAll('.quiz-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const page = card.dataset.quiz;
+    window.location.href = page;
+  });
+});
+
+// BACK TO DASHBOARD
+document.getElementById('backHome').addEventListener('click', () => {
+  window.location.href = "index.html"; // your main LifeApp page
+});

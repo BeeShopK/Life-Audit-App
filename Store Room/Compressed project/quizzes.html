@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeApp Quizzes</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="quizzes.css">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+      <h1>LifeApp Quizzes</h1>
+
+<a href="index.html" class="back-btn" title="Go to Dashboard">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+      </a>
+      <!-- Home Button (Direct Link) -->
+      <a href="index.html" class="home-btn" title="Go to Dashboard">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+    </div>
+
+    <!-- QUIZ LIST -->
+    <div class="quiz-list">
+
+      <div class="quiz-card" data-quiz="mirror-test.html">
+        <h2>The Mirror Test</h2>
+        <p>Self-Awareness Quiz</p>
+      </div>
+
+      <div class="quiz-card" data-quiz="connection.html">
+        <h2>The Connection Code</h2>
+        <p>Relationships Quiz</p>
+      </div>
+
+      <div class="quiz-card" data-quiz="hardtruth.html">
+        <h2>The Hard Truth</h2>
+        <p>Life Audit</p>
+      </div>
+
+      <div class="quiz-card" data-quiz="career.html">
+        <h2>The Purpose Audit</h2>
+        <p>Career Quiz</p>
+      </div>
+
+      <div class="quiz-card" data-quiz="mental-wellbeing.html">
+        <h2>The Inner Weather</h2>
+        <p>Mental Wellbeing Quiz</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    // Navigate to selected quiz
+    document.querySelectorAll('.quiz-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const quizUrl = card.dataset.quiz;
+
+        // Optional: store last visited quiz
+        localStorage.setItem('currentQuiz', quizUrl);
+
+        // Redirect
+        window.location.href = quizUrl;
+      });
+    });
+  </script>
+
+</body>
+</html>

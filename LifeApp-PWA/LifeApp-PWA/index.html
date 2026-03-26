@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>LifeApp — Know Yourself</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0b0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LifeApp">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+/* ════ DESIGN TOKENS ═══════════════════════════════════════════════ */
+:root {
+  --bg:        #0b0b0b;
+  --bg2:       #101010;
+  --card:      #141414;
+  --card-h:    #1c1c1c;
+  --pri:       #1db954;
+  --pri-d:     rgba(29,185,84,.12);
+  --pri-g:     rgba(29,185,84,.25);
+  --text:      #e8e8e8;
+  --sub:       #a0a0a0;
+  --muted:     #606060;
+  --faint:     #282828;
+  --border:    rgba(255,255,255,.07);
+  --border-h:  rgba(255,255,255,.12);
+  --r:         14px;
+  --rsm:       8px;
+  --rlg:       20px;
+  --ease:      cubic-bezier(.25,0,0,1);
+  --t:         .2s;
+  --nav-h:     64px;
+  --safe-b:    env(safe-area-inset-bottom, 0px);
+  --safe-t:    env(safe-area-inset-top, 0px);
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
+a { text-decoration:none; color:inherit }
+ul,ol { list-style:none }
+button { font-family:inherit; cursor:pointer; border:none; background:none }
+input,textarea { font-family:inherit; background:none; border:none; outline:none; color:inherit }
+
+html { scroll-behavior:smooth }
+body {
+  font-family:'Outfit',sans-serif; font-weight:300;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Grain */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.55;
+}
+/* Ambient top glow */
+body::before {
+  content:''; position:fixed; top:0; left:0; right:0; height:340px;
+  background:radial-gradient(ellipse 70% 50% at 50% -10%, rgba(29,185,84,.07), transparent);
+  pointer-events:none; z-index:0;
+}
+
+::-webkit-scrollbar { width:3px }
+::-webkit-scrollbar-thumb { background:#222; border-radius:99px }
+
+/* ════ SCROLL WRAPPER ══════════════════════════════════════════════ */
+#app { position:relative; min-height:100vh }
+
+/* ════ SPLASH ══════════════════════════════════════════════════════ */
+#splash {
+  position:fixed; inset:0; z-index:9000;
+  background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px;
+  animation:splashOut .5s ease forwards;
+  animation-delay:1.8s;
+}
+@keyframes splashOut { to { opacity:0; pointer-events:none; } }
+#splash.gone { display:none }
+
+.splash-logo {
+  font-family:'Cormorant Garamond',serif;
+  font-size:52px; font-weight:300; color:#fff; letter-spacing:-.03em;
+}
+.splash-logo em { color:var(--pri); font-style:italic }
+.splash-sub { font-size:13px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase }
+.splash-dot {
+  width:6px; height:6px; background:var(--pri); border-radius:50%;
+  animation:pulse 1s ease infinite;
+}
+@keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.5} }
+
+/* ════ ONBOARDING ═══════════════════════════════════════════════════ */
+#onboarding {
+  position:fixed; inset:0; z-index:8000;
+  background:var(--bg);
+  display:flex; flex-direction:column;
+  padding-top:var(--safe-t);
+}
+#onboarding.hidden { display:none }
+
+.ob-slides { flex:1; overflow:hidden; position:relative }
+.ob-slide {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:40px 32px;
+  opacity:0; transform:translateX(60px);
+  transition:all .4s var(--ease);
+  pointer-events:none;
+}
+.ob-slide.active { opacity:1; transform:none; pointer-events:auto }
+.ob-slide.left { opacity:0; transform:translateX(-60px) }
+
+.ob-icon { font-size:72px; margin-bottom:28px; line-height:1 }
+.ob-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:30px; font-weight:400; color:#fff;
+  text-align:center; line-height:1.25; margin-bottom:14px;
+}
+.ob-title em { color:var(--pri); font-style:italic }
+.ob-desc { font-size:15px; color:var(--sub); text-align:center; line-height:1.65; max-width:300px }
+
+.ob-bottom { padding:24px 32px calc(32px + var(--safe-b)) }
+.ob-dots { display:flex; justify-content:center; gap:8px; margin-bottom:24px }
+.ob-dot {
+  width:6px; height:6px; border-radius:99px;
+  background:var(--faint); transition:all .3s var(--ease);
+}
+.ob-dot.active { width:20px; background:var(--pri) }
+.ob-nav { display:flex; gap:12px }
+.ob-skip { flex:1; padding:14px; text-align:center; color:var(--muted); font-size:14px }
+.ob-next {
+  flex:2; padding:14px; background:var(--pri); color:#000;
+  font-size:15px; font-weight:600; border-radius:var(--r);
+  transition:opacity var(--t);
+}
+.ob-next:active { opacity:.8 }
+
+/* ════ AUTH ════════════════════════════════════════════════════════ */
+#auth {
+  position:fixed; inset:0; z-index:7000;
+  background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:40px 28px calc(40px + var(--safe-b));
+  padding-top:calc(var(--safe-t) + 40px);
+}
+#auth.hidden { display:none }
+
+.auth-logo {
+  font-family:'Cormorant Garamond',serif;
+  font-size:38px; font-weight:300; color:#fff; letter-spacing:-.03em;
+  margin-bottom:6px;
+}
+.auth-logo em { color:var(--pri); font-style:italic }
+.auth-tagline { font-size:13px; color:var(--muted); margin-bottom:36px }
+
+.auth-tabs { display:flex; gap:4px; background:var(--faint); border-radius:var(--r); padding:4px; margin-bottom:28px; width:100%; max-width:320px }
+.auth-tab {
+  flex:1; padding:10px; text-align:center; font-size:14px; font-weight:500;
+  color:var(--muted); border-radius:10px; transition:all var(--t) var(--ease);
+}
+.auth-tab.active { background:var(--card-h); color:var(--text) }
+
+.auth-form { width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px }
+.auth-field {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px 16px;
+  font-size:15px; color:var(--text); width:100%;
+  transition:border-color var(--t);
+}
+.auth-field:focus { border-color:rgba(29,185,84,.4) }
+.auth-field::placeholder { color:var(--muted) }
+
+.auth-btn {
+  padding:15px; background:var(--pri); color:#000;
+  font-size:15px; font-weight:600; border-radius:var(--r);
+  margin-top:4px; transition:opacity var(--t);
+}
+.auth-btn:active { opacity:.8 }
+.auth-err { font-size:13px; color:#e55; text-align:center; min-height:18px }
+
+/* ════ MAIN APP ════════════════════════════════════════════════════ */
+#main { display:none; flex-direction:column; min-height:100vh; padding-bottom:calc(var(--nav-h) + var(--safe-b)) }
+#main.show { display:flex }
+
+/* ── TOP BAR ──────────────────────────────────────────────────── */
+.topbar {
+  position:sticky; top:0; z-index:100;
+  background:rgba(11,11,11,.92); backdrop-filter:blur(12px);
+  padding:calc(var(--safe-t) + 12px) 20px 12px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.topbar-logo {
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px; font-weight:400; color:#fff; letter-spacing:-.02em;
+}
+.topbar-logo em { color:var(--pri); font-style:italic }
+.topbar-right { display:flex; align-items:center; gap:14px }
+.topbar-avatar {
+  width:34px; height:34px; border-radius:50%;
+  background:var(--pri-d); border:1px solid var(--pri-g);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:600; color:var(--pri); cursor:pointer;
+}
+.topbar-notif {
+  width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; color:var(--sub); cursor:pointer;
+  position:relative;
+}
+.notif-dot {
+  position:absolute; top:6px; right:6px;
+  width:7px; height:7px; background:var(--pri);
+  border-radius:50%; border:1.5px solid var(--bg);
+  display:none;
+}
+.notif-dot.show { display:block }
+
+/* ── BOTTOM NAV ──────────────────────────────────────────────── */
+.bottom-nav {
+  position:fixed; bottom:0; left:0; right:0; z-index:200;
+  background:rgba(11,11,11,.95); backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);
+  height:calc(var(--nav-h) + var(--safe-b));
+  padding-bottom:var(--safe-b);
+  display:flex; align-items:flex-start;
+}
+.nav-tabs { display:flex; width:100% }
+.nav-tab {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px;
+  color:var(--muted); font-size:10px; font-weight:500;
+  cursor:pointer; transition:color var(--t); position:relative;
+  letter-spacing:.02em; text-transform:uppercase;
+}
+.nav-tab i { font-size:18px; transition:transform var(--t) var(--ease) }
+.nav-tab.active { color:var(--pri) }
+.nav-tab.active i { transform:translateY(-1px) }
+.nav-tab-ink {
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  width:0; height:2px; background:var(--pri); border-radius:2px;
+  transition:width .25s var(--ease);
+}
+.nav-tab.active .nav-tab-ink { width:20px }
+
+/* ── VIEWS ───────────────────────────────────────────────────── */
+.view { display:none; flex-direction:column; animation:fadeUp .25s var(--ease) }
+.view.active { display:flex }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+
+/* ── PAGE SECTIONS ───────────────────────────────────────────── */
+.page-header { padding:22px 20px 8px }
+.page-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px; font-weight:400; color:#fff; letter-spacing:-.02em;
+}
+.page-sub { font-size:13px; color:var(--muted); margin-top:4px }
+
+.section { padding:16px 20px }
+.section-label {
+  font-size:11px; font-weight:600; color:var(--muted);
+  letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px;
+}
+
+/* ── CARDS ───────────────────────────────────────────────────── */
+.card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:18px;
+  transition:border-color var(--t), background var(--t);
+}
+.card:active { background:var(--card-h) }
+
+/* ── BUTTONS ─────────────────────────────────────────────────── */
+.btn {
+  padding:13px 20px; border-radius:var(--rsm);
+  font-size:14px; font-weight:500; letter-spacing:.01em;
+  transition:opacity var(--t), transform var(--t) var(--ease);
+  display:inline-flex; align-items:center; gap:8px;
+}
+.btn:active { opacity:.75; transform:scale(.98) }
+.btn-pri { background:var(--pri); color:#000; font-weight:600 }
+.btn-ghost { background:var(--faint); color:var(--text) }
+.btn-outline { background:transparent; color:var(--sub); border:1px solid var(--border) }
+.btn-block { width:100%; justify-content:center }
+
+/* ════ DASHBOARD ═══════════════════════════════════════════════════ */
+.dash-hero {
+  padding:20px 20px 12px;
+  background:linear-gradient(180deg, rgba(29,185,84,.04) 0%, transparent 100%);
+}
+.dash-greeting { font-size:13px; color:var(--muted); margin-bottom:4px }
+.dash-name { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:400; color:#fff; letter-spacing:-.02em }
+.dash-name strong { color:var(--pri) }
+.dash-streak {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--pri-d); border:1px solid var(--pri-g);
+  padding:5px 12px; border-radius:99px;
+  font-size:12px; font-weight:500; color:var(--pri);
+  margin-top:12px;
+}
+
+.dash-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:0 20px 16px }
+.stat-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px 12px; text-align:center;
+}
+.stat-num { font-size:22px; font-weight:600; color:var(--pri); line-height:1 }
+.stat-lbl { font-size:10px; color:var(--muted); margin-top:4px; text-transform:uppercase; letter-spacing:.06em }
+
+/* AI CARD */
+.ai-card {
+  margin:0 20px 16px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--rlg); overflow:hidden;
+}
+.ai-card-head {
+  padding:14px 18px;
+  display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.ai-avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--pri-d); border:1px solid var(--pri-g);
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px;
+}
+.ai-head-name { font-size:14px; font-weight:500; color:var(--text) }
+.ai-head-sub { font-size:11px; color:var(--pri) }
+.ai-chips {
+  display:flex; gap:8px; padding:12px 18px;
+  overflow-x:auto; scrollbar-width:none;
+}
+.ai-chips::-webkit-scrollbar { display:none }
+.ai-chip {
+  flex-shrink:0; padding:7px 13px; border-radius:99px;
+  background:var(--faint); border:1px solid var(--border);
+  font-size:12px; color:var(--sub); cursor:pointer;
+  white-space:nowrap; transition:all var(--t);
+}
+.ai-chip:active { background:var(--card-h); border-color:var(--pri-g); color:var(--pri) }
+.ai-response {
+  margin:0 18px; padding:12px 0;
+  font-size:14px; color:var(--sub); line-height:1.65;
+  min-height:0; max-height:0; overflow:hidden;
+  transition:max-height .35s var(--ease), padding .25s var(--ease);
+}
+.ai-response.open { max-height:300px; min-height:40px; padding:12px 0 4px }
+.ai-response p { margin-bottom:8px }
+.ai-response p:last-child { margin-bottom:0 }
+.ai-typing { display:flex; gap:4px; align-items:center; padding:2px 0 }
+.ai-typing span {
+  width:6px; height:6px; background:var(--pri); border-radius:50%;
+  animation:bounce .9s ease infinite;
+}
+.ai-typing span:nth-child(2){animation-delay:.15s}
+.ai-typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+.ai-input-row {
+  display:flex; gap:8px; align-items:center;
+  padding:10px 12px 12px;
+}
+.ai-input {
+  flex:1; background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--r); padding:10px 14px;
+  font-size:14px; color:var(--text);
+  transition:border-color var(--t);
+}
+.ai-input:focus { border-color:rgba(29,185,84,.4) }
+.ai-input::placeholder { color:var(--muted) }
+.ai-send {
+  width:38px; height:38px; border-radius:var(--rsm);
+  background:var(--pri); color:#000;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0; transition:opacity var(--t);
+}
+.ai-send:active { opacity:.75 }
+.ai-send:disabled { opacity:.3 }
+
+/* AFFIRMATION */
+.affirm-card {
+  margin:0 20px 16px;
+  background:linear-gradient(135deg, rgba(29,185,84,.08), var(--card));
+  border:1px solid rgba(29,185,84,.15);
+  border-radius:var(--rlg); padding:20px;
+}
+.affirm-text {
+  font-family:'Cormorant Garamond',serif;
+  font-size:19px; font-weight:400; font-style:italic;
+  color:#fff; line-height:1.55;
+  transition:opacity .3s;
+}
+.affirm-btn {
+  margin-top:14px; font-size:12px; color:var(--pri);
+  display:flex; align-items:center; gap:6px;
+}
+
+/* MOOD */
+.mood-row { display:flex; gap:8px; justify-content:space-between; padding:4px 0 }
+.mood-btn {
+  flex:1; aspect-ratio:1; border-radius:var(--rsm);
+  background:var(--faint); border:1.5px solid transparent;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; font-size:20px; transition:all var(--t) var(--ease); cursor:pointer;
+}
+.mood-lbl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em }
+.mood-btn.chosen { border-color:var(--pri); background:var(--pri-d) }
+.mood-btn:active { transform:scale(.95) }
+
+/* ════ QUIZ HUB ════════════════════════════════════════════════════ */
+.quiz-grid { display:flex; flex-direction:column; gap:12px; padding:0 20px 20px }
+.qhc {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--rlg); padding:18px;
+  transition:border-color var(--t), background var(--t);
+  cursor:pointer; position:relative; overflow:hidden;
+}
+.qhc::before {
+  content:''; position:absolute; top:0; left:0; bottom:0; width:3px;
+  background:var(--pri); opacity:0; transition:opacity var(--t);
+}
+.qhc.done::before { opacity:1 }
+.qhc:active { background:var(--card-h) }
+.qhc-top { display:flex; align-items:center; gap:14px; margin-bottom:10px }
+.qhc-icon { font-size:28px; line-height:1 }
+.qhc-info { flex:1 }
+.qhc-title { font-size:16px; font-weight:500; color:var(--text); margin-bottom:2px }
+.qhc-sub { font-size:12px; color:var(--muted) }
+.qhc-badge {
+  font-size:11px; font-weight:600; padding:4px 10px; border-radius:99px;
+  background:var(--pri-d); color:var(--pri); border:1px solid var(--pri-g);
+}
+.qhc-badge.new { background:rgba(255,165,0,.1); color:#ffa500; border-color:rgba(255,165,0,.2) }
+.qhc-desc { font-size:13px; color:var(--sub); line-height:1.55; margin-bottom:14px }
+.qhc-footer { display:flex; align-items:center; justify-content:space-between }
+.qhc-score { font-size:12px; color:var(--muted) }
+.qhc-score span { color:var(--pri); font-weight:500 }
+.qhc-btn {
+  padding:9px 18px; border-radius:var(--rsm);
+  background:var(--pri); color:#000; font-size:13px; font-weight:600;
+  transition:opacity var(--t);
+}
+.qhc-btn.retake { background:var(--faint); color:var(--text) }
+.qhc-btn:active { opacity:.75 }
+
+/* ════ QUIZ ENGINE ══════════════════════════════════════════════════ */
+.quiz-topbar {
+  padding:16px 20px 12px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.quiz-back { font-size:20px; color:var(--sub); padding:4px; cursor:pointer }
+.quiz-counter { font-size:13px; color:var(--muted) }
+.quiz-counter span { color:var(--text); font-weight:500 }
+.progress-bar {
+  height:3px; background:var(--faint); margin:0 20px;
+}
+.progress-fill {
+  height:100%; background:var(--pri); border-radius:99px;
+  transition:width .4s var(--ease);
+}
+.quiz-q-wrap { padding:24px 20px 20px }
+.quiz-domain { font-size:11px; color:var(--pri); text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px }
+.quiz-q {
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px; font-weight:400; color:#fff; line-height:1.45;
+}
+.quiz-opts { display:flex; flex-direction:column; gap:10px; padding:0 20px }
+.opt-btn {
+  padding:14px 16px; border-radius:var(--r);
+  background:var(--card); border:1.5px solid var(--border);
+  color:var(--sub); font-size:14px; text-align:left; line-height:1.45;
+  transition:all var(--t) var(--ease); cursor:pointer;
+}
+.opt-btn.selected { background:var(--pri-d); border-color:rgba(29,185,84,.5); color:var(--text) }
+.opt-btn:active { transform:scale(.99) }
+.quiz-nav { display:flex; gap:10px; padding:20px; margin-top:auto }
+.quiz-nav .btn { flex:1 }
+
+/* ════ RESULTS ══════════════════════════════════════════════════════ */
+.res-hero {
+  margin:20px; padding:24px;
+  background:linear-gradient(135deg, rgba(29,185,84,.1), var(--card));
+  border:1px solid rgba(29,185,84,.2);
+  border-radius:var(--rlg); text-align:center;
+}
+.res-emoji { font-size:48px; margin-bottom:12px }
+.res-quiz-sub { font-size:11px; color:var(--pri); text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px }
+.res-archetype {
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px; font-weight:400; color:#fff; margin-bottom:10px;
+}
+.res-desc { font-size:14px; color:var(--sub); line-height:1.65 }
+.res-score { margin-top:16px; font-size:22px; font-weight:600; color:var(--pri) }
+.res-score small { font-size:13px; color:var(--muted); font-weight:300 }
+
+.dom-row { margin-bottom:14px }
+.dom-header { display:flex; justify-content:space-between; margin-bottom:6px }
+.dom-name { font-size:13px; color:var(--sub) }
+.dom-score { font-size:12px; color:var(--muted) }
+.dom-track { height:5px; background:var(--faint); border-radius:99px; overflow:hidden }
+.dom-fill { height:100%; background:var(--pri); border-radius:99px; width:0; transition:width .7s var(--ease) }
+
+.res-tags { display:flex; gap:8px; flex-wrap:wrap }
+.res-tag {
+  padding:6px 12px; border-radius:99px; font-size:12px;
+}
+.res-tag.strong { background:rgba(29,185,84,.12); color:var(--pri); border:1px solid rgba(29,185,84,.2) }
+.res-tag.weak { background:rgba(255,100,100,.08); color:#e07070; border:1px solid rgba(255,100,100,.15) }
+
+.res-actions { display:flex; flex-direction:column; gap:10px; padding:0 20px 28px }
+
+/* ════ JOURNAL ══════════════════════════════════════════════════════ */
+.journal-compose {
+  margin:0 20px 16px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--rlg); overflow:hidden;
+}
+.journal-compose-head {
+  padding:14px 18px 10px;
+  font-size:13px; color:var(--muted);
+}
+.j-area {
+  width:100%; padding:0 18px; min-height:120px; resize:none;
+  font-size:15px; color:var(--text); line-height:1.6; background:none;
+}
+.j-area::placeholder { color:var(--muted) }
+.j-compose-footer {
+  padding:10px 12px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.j-char-count { font-size:12px; color:var(--muted) }
+.j-save-btn {
+  padding:9px 18px; background:var(--pri); color:#000;
+  border-radius:var(--rsm); font-size:13px; font-weight:600;
+  transition:opacity var(--t);
+}
+.j-save-btn:active { opacity:.75 }
+
+.j-list { display:flex; flex-direction:column; gap:10px; padding:0 20px 20px }
+.j-entry {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:16px;
+}
+.j-entry-date { font-size:11px; color:var(--muted); margin-bottom:6px }
+.j-entry-text { font-size:14px; color:var(--sub); line-height:1.55 }
+
+/* ════ PROGRESS ═════════════════════════════════════════════════════ */
+.h-list { display:flex; flex-direction:column; gap:0; padding:0 20px 20px }
+.h-item { display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border) }
+.h-item:last-child { border-bottom:none }
+.h-dot { width:8px; height:8px; background:var(--pri); border-radius:50%; flex-shrink:0; margin-top:5px }
+.h-text { font-size:14px; color:var(--text) }
+.h-time { font-size:11px; color:var(--muted); margin-top:3px }
+
+/* ════ WHAT'S NEW ═══════════════════════════════════════════════════ */
+.wn-list { display:flex; flex-direction:column; gap:14px; padding:0 20px 28px }
+.wn-item {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:18px;
+}
+.wn-ver {
+  font-size:11px; font-weight:600; color:var(--pri);
+  text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;
+}
+.wn-date { font-size:11px; color:var(--muted); margin-bottom:10px }
+.wn-title { font-size:16px; font-weight:500; color:var(--text); margin-bottom:8px }
+.wn-changes { display:flex; flex-direction:column; gap:5px }
+.wn-change { font-size:13px; color:var(--sub); padding-left:12px; position:relative }
+.wn-change::before { content:'•'; position:absolute; left:0; color:var(--pri) }
+
+/* ════ SETTINGS ════════════════════════════════════════════════════ */
+.settings-section { margin-bottom:8px }
+.settings-header { padding:20px 20px 8px }
+.settings-group-label {
+  padding:6px 20px; font-size:11px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.1em;
+}
+.settings-list { background:var(--card); border-top:1px solid var(--border); border-bottom:1px solid var(--border) }
+.settings-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px; border-bottom:1px solid var(--border); cursor:pointer;
+}
+.settings-row:last-child { border-bottom:none }
+.settings-row-left { display:flex; align-items:center; gap:12px }
+.settings-row-icon {
+  width:32px; height:32px; border-radius:var(--rsm);
+  background:var(--faint); display:flex; align-items:center; justify-content:center;
+  font-size:15px;
+}
+.settings-row-name { font-size:15px; color:var(--text) }
+.settings-row-sub { font-size:12px; color:var(--muted); margin-top:2px }
+.settings-row-right { display:flex; align-items:center; gap:8px; flex-shrink:0 }
+.settings-chevron { font-size:12px; color:var(--muted) }
+.settings-val { font-size:13px; color:var(--muted) }
+
+/* TOGGLE */
+.toggle-wrap { position:relative; width:44px; height:26px }
+.toggle-wrap input { opacity:0; width:0; height:0; position:absolute }
+.toggle-slider {
+  position:absolute; inset:0; border-radius:99px;
+  background:var(--faint); cursor:pointer;
+  transition:background var(--t);
+}
+.toggle-slider::before {
+  content:''; position:absolute;
+  width:20px; height:20px; border-radius:50%;
+  left:3px; top:3px; background:#fff;
+  transition:transform var(--t) var(--ease);
+}
+.toggle-wrap input:checked + .toggle-slider { background:var(--pri) }
+.toggle-wrap input:checked + .toggle-slider::before { transform:translateX(18px) }
+
+.time-picker-row {
+  padding:12px 20px 16px;
+  display:none; border-bottom:1px solid var(--border);
+}
+.time-picker-row.show { display:flex }
+.time-picker-row input[type="time"] {
+  background:var(--faint); border:1px solid var(--border);
+  border-radius:var(--rsm); padding:10px 14px;
+  font-size:15px; color:var(--text); width:100%;
+  color-scheme:dark;
+}
+
+.settings-danger { color:#e05555 }
+.settings-danger .settings-row-icon { background:rgba(220,50,50,.1) }
+
+/* ════ MODALS / OVERLAYS ═══════════════════════════════════════════ */
+.modal-overlay {
+  position:fixed; inset:0; z-index:3000;
+  background:rgba(0,0,0,.7); backdrop-filter:blur(4px);
+  display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity var(--t);
+}
+.modal-overlay.open { opacity:1; pointer-events:auto }
+.modal-sheet {
+  background:var(--bg2); border-radius:20px 20px 0 0;
+  border:1px solid var(--border); border-bottom:none;
+  width:100%; max-width:480px;
+  padding:0 0 calc(20px + var(--safe-b));
+  transform:translateY(100%); transition:transform .35s var(--ease);
+  max-height:80vh; overflow-y:auto;
+}
+.modal-overlay.open .modal-sheet { transform:none }
+.modal-handle { width:36px; height:4px; background:var(--faint); border-radius:99px; margin:12px auto 16px }
+.modal-title { font-size:18px; font-weight:500; padding:0 20px 16px; color:var(--text) }
+
+/* ════ EMPTY STATES ════════════════════════════════════════════════ */
+.empty { text-align:center; padding:40px 20px; color:var(--muted); font-size:14px }
+.empty-icon { font-size:36px; margin-bottom:12px }
+
+/* ════ UTILITY ═════════════════════════════════════════════════════ */
+.hidden { display:none !important }
+.text-pri { color:var(--pri) }
+.text-muted { color:var(--muted) }
+.divider { height:1px; background:var(--border); margin:0 20px }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ════ SPLASH ══════════════════════════════════════════════════ -->
+<div id="splash">
+  <div class="splash-logo">Life<em>App</em></div>
+  <div class="splash-sub">Know Yourself</div>
+  <div class="splash-dot"></div>
+</div>
+
+<!-- ════ ONBOARDING ══════════════════════════════════════════════ -->
+<div id="onboarding" class="hidden">
+  <div class="ob-slides">
+    <div class="ob-slide active" id="ob0">
+      <div class="ob-icon">🪞</div>
+      <div class="ob-title">Welcome to <em>LifeApp</em></div>
+      <div class="ob-desc">A personal development dashboard built for radical self-honesty. No fluff — just deep, useful insight about who you are.</div>
+    </div>
+    <div class="ob-slide" id="ob1">
+      <div class="ob-icon">🧭</div>
+      <div class="ob-title">Five Domains. <em>One Picture.</em></div>
+      <div class="ob-desc">Take quizzes across Self-Awareness, Relationships, Life Audit, Career, and Mental Wellbeing to build a complete picture of where you stand.</div>
+    </div>
+    <div class="ob-slide" id="ob2">
+      <div class="ob-icon">✨</div>
+      <div class="ob-title">Your AI <em>Coach</em> is Here</div>
+      <div class="ob-desc">Ask anything about your growth, get personalised reflections, and receive guidance tailored to your unique profile — powered by AI.</div>
+    </div>
+  </div>
+  <div class="ob-bottom">
+    <div class="ob-dots">
+      <div class="ob-dot active" id="dot0"></div>
+      <div class="ob-dot" id="dot1"></div>
+      <div class="ob-dot" id="dot2"></div>
+    </div>
+    <div class="ob-nav">
+      <button class="ob-skip" id="obSkip" onclick="skipOnboarding()">Skip</button>
+      <button class="ob-next" id="obNext" onclick="obNext()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ AUTH ═════════════════════════════════════════════════════ -->
+<div id="auth" class="hidden">
+  <div class="auth-logo">Life<em>App</em></div>
+  <div class="auth-tagline">Your journey to knowing yourself</div>
+  <div class="auth-tabs">
+    <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Sign In</div>
+    <div class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">Create Account</div>
+  </div>
+  <div class="auth-form" id="loginForm">
+    <input class="auth-field" id="loginEmail" type="email" placeholder="Email address" autocomplete="email">
+    <input class="auth-field" id="loginPass" type="password" placeholder="Password" autocomplete="current-password">
+    <div class="auth-err" id="loginErr"></div>
+    <button class="auth-btn" onclick="doLogin()">Sign In</button>
+  </div>
+  <div class="auth-form hidden" id="signupForm">
+    <input class="auth-field" id="signupName" type="text" placeholder="Your first name" autocomplete="given-name">
+    <input class="auth-field" id="signupEmail" type="email" placeholder="Email address" autocomplete="email">
+    <input class="auth-field" id="signupPass" type="password" placeholder="Create a password (6+ chars)" autocomplete="new-password">
+    <div class="auth-err" id="signupErr"></div>
+    <button class="auth-btn" onclick="doSignup()">Create Account</button>
+  </div>
+</div>
+
+<!-- ════ MAIN APP ═════════════════════════════════════════════════ -->
+<div id="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">Life<em>App</em></div>
+    <div class="topbar-right">
+      <div class="topbar-notif" onclick="showWhatsNew()">
+        <i class="fas fa-bell"></i>
+        <div class="notif-dot show" id="notifDot"></div>
+      </div>
+      <div class="topbar-avatar" id="userAvatar" onclick="navigate('settings')">K</div>
+    </div>
+  </div>
+
+  <!-- VIEWS -->
+
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <div class="dash-hero">
+      <div class="dash-greeting" id="dashGreeting">Good evening</div>
+      <div class="dash-name">Hello, <strong id="dashName">there</strong></div>
+      <div class="dash-streak" id="dashStreak">🌱 Day 1</div>
+    </div>
+
+    <div class="dash-stats">
+      <div class="stat-card">
+        <div class="stat-num" id="statQuizzes">0</div>
+        <div class="stat-lbl">Quizzes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statJournals">0</div>
+        <div class="stat-lbl">Entries</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statStreak">1</div>
+        <div class="stat-lbl">Day Streak</div>
+      </div>
+    </div>
+
+    <!-- ASK AI -->
+    <div class="ai-card">
+      <div class="ai-card-head">
+        <div class="ai-avatar">🤖</div>
+        <div>
+          <div class="ai-head-name">LifeAI Coach</div>
+          <div class="ai-head-sub">● Online</div>
+        </div>
+      </div>
+      <div class="ai-chips" id="aiChips">
+        <div class="ai-chip" onclick="askAI('How am I doing based on my progress?')">How am I doing?</div>
+        <div class="ai-chip" onclick="askAI('What should I focus on for personal growth this week?')">What to focus on?</div>
+        <div class="ai-chip" onclick="askAI('Give me a deep reflection prompt for today.')">Daily reflection</div>
+        <div class="ai-chip" onclick="askAI('Which life domain do I need to work on most?')">Weakest domain?</div>
+      </div>
+      <div class="ai-response" id="aiResponse"></div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="aiInput" placeholder="Ask your coach anything..." maxlength="300"
+          onkeydown="if(event.key==='Enter')sendAI()">
+        <button class="ai-send" id="aiSendBtn" onclick="sendAI()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <!-- AFFIRMATION -->
+    <div class="affirm-card">
+      <div class="affirm-text" id="affirmText"></div>
+      <button class="affirm-btn" onclick="nextAffirm()"><i class="fas fa-redo" style="font-size:10px"></i> New insight</button>
+    </div>
+
+    <!-- MOOD -->
+    <div class="section">
+      <div class="section-label">How are you feeling today?</div>
+      <div class="mood-row" id="moodRow">
+        <div class="mood-btn" data-mood="great" onclick="logMood('great','😄')"><span>😄</span><span class="mood-lbl">Great</span></div>
+        <div class="mood-btn" data-mood="good"  onclick="logMood('good','🙂')"><span>🙂</span><span class="mood-lbl">Good</span></div>
+        <div class="mood-btn" data-mood="okay"  onclick="logMood('okay','😐')"><span>😐</span><span class="mood-lbl">Okay</span></div>
+        <div class="mood-btn" data-mood="low"   onclick="logMood('low','😔')"><span>😔</span><span class="mood-lbl">Low</span></div>
+        <div class="mood-btn" data-mood="rough" onclick="logMood('rough','😤')"><span>😤</span><span class="mood-lbl">Rough</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ HUB -->
+  <div class="view" id="view-quiz-hub">
+    <div class="page-header">
+      <div class="page-title">Quizzes</div>
+      <div class="page-sub">5 deep assessments · 20 questions each</div>
+    </div>
+    <div class="quiz-grid" id="quizGrid"></div>
+  </div>
+
+  <!-- QUIZ ENGINE -->
+  <div class="view" id="view-quiz">
+    <div class="quiz-topbar">
+      <div class="quiz-back" onclick="navigate('quiz-hub')"><i class="fas fa-arrow-left"></i></div>
+      <div class="quiz-counter"><span id="qCurr">1</span> / <span id="qTotal">20</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="qProgress" style="width:5%"></div></div>
+    <div class="quiz-q-wrap">
+      <div class="quiz-domain" id="qDomain"></div>
+      <div class="quiz-q" id="qText"></div>
+    </div>
+    <div class="quiz-opts" id="qOpts"></div>
+    <div class="quiz-nav">
+      <button class="btn btn-ghost" id="qPrevBtn" onclick="quizPrev()"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="btn btn-pri" id="qNextBtn" onclick="quizNext()">Next <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="view" id="view-results">
+    <div class="quiz-topbar">
+      <div class="quiz-back" onclick="navigate('quiz-hub')"><i class="fas fa-arrow-left"></i></div>
+      <div style="font-size:14px;color:var(--muted)">Your Results</div>
+    </div>
+    <div class="res-hero">
+      <div class="res-emoji" id="resEmoji">🪞</div>
+      <div class="res-quiz-sub" id="resQuizSub">Self-Awareness</div>
+      <div class="res-archetype" id="resArchetype">The Reflective Mind</div>
+      <div class="res-desc" id="resDesc"></div>
+      <div class="res-score" id="resScore">52 <small>/ 80</small></div>
+    </div>
+    <div class="section">
+      <div class="section-label">Domain Breakdown</div>
+      <div id="resDomains"></div>
+    </div>
+    <div class="section">
+      <div class="section-label">Strengths & Areas to Grow</div>
+      <div class="res-tags" id="resTags"></div>
+    </div>
+    <div class="res-actions">
+      <button class="btn btn-pri btn-block" onclick="navigate('quiz-hub')"><i class="fas fa-compass"></i> All Quizzes</button>
+      <button class="btn btn-ghost btn-block" onclick="retakeQuiz()"><i class="fas fa-redo"></i> Retake This Quiz</button>
+      <button class="btn btn-outline btn-block" onclick="navigate('dashboard')"><i class="fas fa-home"></i> Dashboard</button>
+    </div>
+  </div>
+
+  <!-- JOURNAL -->
+  <div class="view" id="view-journal">
+    <div class="page-header">
+      <div class="page-title">Journal</div>
+      <div class="page-sub">Your private space to reflect</div>
+    </div>
+    <div class="journal-compose">
+      <div class="journal-compose-head">What's on your mind?</div>
+      <textarea class="j-area" id="journalText" placeholder="Write freely — this is for your eyes only..." maxlength="2000"
+        oninput="document.getElementById('jCharCount').textContent=this.value.length+'/2000'"></textarea>
+      <div class="j-compose-footer">
+        <span class="j-char-count" id="jCharCount">0/2000</span>
+        <button class="j-save-btn" onclick="saveJournal()">Save Entry</button>
+      </div>
+    </div>
+    <div class="section-label" style="padding:0 20px 12px">Past Entries</div>
+    <div class="j-list" id="journalList"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="view" id="view-progress">
+    <div class="page-header">
+      <div class="page-title">Progress</div>
+      <div class="page-sub">Your activity timeline</div>
+    </div>
+    <div class="h-list" id="historyList"></div>
+  </div>
+
+  <!-- WHAT'S NEW -->
+  <div class="view" id="view-whatsnew">
+    <div class="page-header">
+      <div class="page-title">What's New</div>
+      <div class="page-sub">Updates & improvements</div>
+    </div>
+    <div class="wn-list">
+      <div class="wn-item">
+        <div class="wn-ver">Version 2.0</div>
+        <div class="wn-date">March 2026</div>
+        <div class="wn-title">LifeApp is now a full PWA 🚀</div>
+        <div class="wn-changes">
+          <div class="wn-change">Installable on Android and iOS — just tap "Add to Home Screen"</div>
+          <div class="wn-change">AI Coach powered by Claude — ask anything about your growth</div>
+          <div class="wn-change">Daily reminder notifications — stay consistent with your practice</div>
+          <div class="wn-change">Sign in & sign up — your profile, your data</div>
+          <div class="wn-change">Improved mobile-first UI — smoother, faster, more polished</div>
+          <div class="wn-change">Onboarding flow for new users</div>
+          <div class="wn-change">Settings, privacy, and account management</div>
+        </div>
+      </div>
+      <div class="wn-item">
+        <div class="wn-ver">Version 1.0</div>
+        <div class="wn-date">January 2026</div>
+        <div class="wn-title">Initial Launch</div>
+        <div class="wn-changes">
+          <div class="wn-change">5 self-assessment quizzes: Self-Awareness, Relationships, Life Audit, Career, Mental Wellbeing</div>
+          <div class="wn-change">20 questions per quiz with archetype scoring</div>
+          <div class="wn-change">Daily journal with entry history</div>
+          <div class="wn-change">Mood check-in & streak tracking</div>
+          <div class="wn-change">Activity timeline and affirmation system</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="view" id="view-settings">
+    <div class="page-header">
+      <div class="page-title">Settings</div>
+    </div>
+
+    <div class="settings-group-label">Account</div>
+    <div class="settings-list">
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-icon">👤</div>
+          <div>
+            <div class="settings-row-name" id="settingsName">—</div>
+            <div class="settings-row-sub" id="settingsEmail">—</div>
+          </div>
+        </div>
+        <div class="settings-row-right"><i class="fas fa-chevron-right settings-chevron"></i></div>
+      </div>
+    </div>
+
+    <div class="settings-group-label" style="margin-top:16px">Notifications</div>
+    <div class="settings-list">
+      <div class="settings-row" id="notifToggleRow">
+        <div class="settings-row-left">
+          <div class="settings-row-icon">🔔</div>
+          <div>
+            <div class="settings-row-name">Daily Reminders</div>
+            <div class="settings-row-sub">Get a nudge to check in each day</div>
+          </div>
+        </div>
+        <div class="settings-row-right">
+          <label class="toggle-wrap">
+            <input type="checkbox" id="notifToggle" onchange="toggleReminder(this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="time-picker-row" id="timePicker">
+        <input type="time" id="reminderTime" value="08:00" style="width:100%"
+          onchange="updateReminderTime(this.value)">
+      </div>
+    </div>
+
+    <div class="settings-group-label" style="margin-top:16px">App</div>
+    <div class="settings-list">
+      <div class="settings-row" onclick="showWhatsNew()">
+        <div class="settings-row-left">
+          <div class="settings-row-icon">🎉</div>
+          <div><div class="settings-row-name">What's New</div></div>
+        </div>
+        <div class="settings-row-right"><i class="fas fa-chevron-right settings-chevron"></i></div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-icon">ℹ️</div>
+          <div>
+            <div class="settings-row-name">Version</div>
+            <div class="settings-row-sub">LifeApp 2.0 PWA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group-label" style="margin-top:16px">Privacy & Data</div>
+    <div class="settings-list">
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-icon">🔒</div>
+          <div>
+            <div class="settings-row-name">Data Storage</div>
+            <div class="settings-row-sub">All data stored locally on your device</div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-row" onclick="showPrivacy()">
+        <div class="settings-row-left">
+          <div class="settings-row-icon">📄</div>
+          <div><div class="settings-row-name">Privacy Policy</div></div>
+        </div>
+        <div class="settings-row-right"><i class="fas fa-chevron-right settings-chevron"></i></div>
+      </div>
+      <div class="settings-row settings-danger" onclick="confirmClearData()">
+        <div class="settings-row-left">
+          <div class="settings-row-icon">🗑️</div>
+          <div><div class="settings-row-name settings-danger">Clear All Data</div></div>
+        </div>
+        <div class="settings-row-right"><i class="fas fa-chevron-right settings-chevron"></i></div>
+      </div>
+    </div>
+
+    <div class="settings-group-label" style="margin-top:16px"></div>
+    <div class="settings-list">
+      <div class="settings-row settings-danger" onclick="doSignOut()">
+        <div class="settings-row-left">
+          <div class="settings-row-icon">🚪</div>
+          <div><div class="settings-row-name settings-danger">Sign Out</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-view="dashboard" onclick="navigate('dashboard')">
+        <i class="fas fa-home"></i><span>Home</span><div class="nav-tab-ink"></div>
+      </div>
+      <div class="nav-tab" data-view="quiz-hub" onclick="navigate('quiz-hub')">
+        <i class="fas fa-compass"></i><span>Quizzes</span><div class="nav-tab-ink"></div>
+      </div>
+      <div class="nav-tab" data-view="journal" onclick="navigate('journal')">
+        <i class="fas fa-pen"></i><span>Journal</span><div class="nav-tab-ink"></div>
+      </div>
+      <div class="nav-tab" data-view="progress" onclick="navigate('progress')">
+        <i class="fas fa-chart-line"></i><span>Progress</span><div class="nav-tab-ink"></div>
+      </div>
+      <div class="nav-tab" data-view="settings" onclick="navigate('settings')">
+        <i class="fas fa-cog"></i><span>More</span><div class="nav-tab-ink"></div>
+      </div>
+    </div>
+  </nav>
+
+</div><!-- /#main -->
+
+<!-- ════ MODALS ═══════════════════════════════════════════════════ -->
+<!-- Privacy Modal -->
+<div class="modal-overlay" id="privacyModal" onclick="closeModal('privacyModal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Privacy Policy</div>
+    <div style="padding:0 20px 8px; font-size:14px; color:var(--sub); line-height:1.7">
+      <p style="margin-bottom:12px"><strong style="color:var(--text)">Your data stays on your device.</strong> LifeApp does not collect, transmit, or store any personal data on external servers.</p>
+      <p style="margin-bottom:12px">Everything you enter — quiz answers, journal entries, mood check-ins, and account details — is stored exclusively in your browser's <code style="color:var(--pri)">localStorage</code>.</p>
+      <p style="margin-bottom:12px">When you use the AI Coach feature, your typed message is sent to the Anthropic Claude API over a secure connection. No other personal data (name, quiz scores, journal) is sent to Anthropic.</p>
+      <p style="margin-bottom:12px">You can clear all locally stored data at any time from Settings → Clear All Data.</p>
+      <p style="color:var(--muted); font-size:12px">LifeApp v2.0 · Last updated March 2026</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#app -->
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   QUIZ DATA (5 quizzes · 20 questions each)
+════════════════════════════════════════════════════════════════ */
+const QUIZZES=[
+{
+  id:'mirror',title:'The Mirror Test',subtitle:'Self-Awareness',icon:'🪞',
+  domains:['Emotional Awareness','Values & Identity','Patterns & Blind Spots','Growth Orientation'],
+  archetypes:[
+    {max:39,label:'The Unconscious Actor',desc:'You move through life largely unaware of your own emotional patterns and motivations. The work of self-knowledge hasn\'t started in earnest — but naming that honestly is the first real step.'},
+    {max:54,label:'The Emerging Observer',desc:'You\'re beginning to see yourself more clearly, but awareness is inconsistent. You notice patterns after the fact more than in the moment. The mirror is in your hands — you\'re just learning to look.'},
+    {max:69,label:'The Reflective Mind',desc:'You have genuine self-awareness and the discipline to examine yourself honestly. You\'re not where you want to be yet, but you\'re working the right muscles.'},
+    {max:80,label:'The Integrated Self',desc:'You operate with a deep, functional understanding of who you are — your values, your patterns, your triggers, and your growth edges. This is rare and worth protecting.'}
+  ],
+  questions:[
+    {q:'When you make a significant mistake, your most common internal response is...',opts:['Denial or blame — I find a way to justify or externalize it','Shame spiral — I know I was wrong but I fixate rather than learn','Brief acknowledgment but not real examination','Honest reflection — I examine what happened and what to change'],domain:'Emotional Awareness'},
+    {q:'How aware are you of your emotional state at any given moment?',opts:['Often unaware until emotions are already controlling my behavior','Somewhat aware but I frequently miss the early signals','Mostly aware — I catch most emotions as they arise','Highly aware — I notice and name my emotions with precision'],domain:'Emotional Awareness'},
+    {q:'When someone close to you describes a negative behavior pattern they see in you, you typically...',opts:['Get defensive and argue against it','Feel hurt and shut down but don\'t examine the claim','Hear it, consider it briefly, but let it fade without real change','Take it seriously, examine the evidence, and act if it checks out'],domain:'Emotional Awareness'},
+    {q:'How often do your words and actions align with each other in daily life?',opts:['Rarely — there\'s significant inconsistency I\'m often aware of','Sometimes — misalignment happens but I don\'t always notice it','Often — I\'m consistent most of the time','Almost always — I live close to what I say and believe'],domain:'Values & Identity'},
+    {q:'How clearly can you articulate your top three personal values — without a long pause?',opts:['I can\'t — I\'ve never really identified them','I have vague ideas but couldn\'t state them clearly','I have them but they\'re not fully examined or tested','Clearly and immediately — they guide real decisions'],domain:'Values & Identity'},
+    {q:'When you make a major life decision, how much do your stated values actually drive it?',opts:['Very little — I often rationalize after the fact','Sometimes — values factor in but fear and convenience usually win','Often — values are genuinely in the equation','Consistently — I check decisions against my values deliberately'],domain:'Values & Identity'},
+    {q:'How honest are you with yourself about what you actually want — versus what you think you should want?',opts:['Not very — I\'ve shaped my desires around expectations for so long I can\'t tell the difference','Partially — I\'m aware of the gap but don\'t examine it deeply','Mostly honest — I\'ve done some work to separate the two','Very honest — I know the difference clearly and act on it'],domain:'Values & Identity'},
+    {q:'How well do you understand your core emotional triggers?',opts:['Not well — I\'m often surprised by my reactions','I know a few but most catch me off guard','I know most of them but haven\'t fully mapped the patterns','Well — I\'ve mapped my triggers and they no longer fully ambush me'],domain:'Patterns & Blind Spots'},
+    {q:'How often do you catch yourself repeating the same emotional or behavioral pattern?',opts:['Rarely — I usually don\'t see patterns until they\'ve caused significant damage','Sometimes — I catch them after the fact occasionally','Often — I notice recurring patterns and am working on them','Consistently — pattern recognition is something I actively practice'],domain:'Patterns & Blind Spots'},
+    {q:'When others seem to have a consistent perception of you that you disagree with, you usually...',opts:['Dismiss it — they don\'t know me','Feel defensive but don\'t examine the evidence','Consider it briefly but return to your self-perception','Take it as data and genuinely explore whether they might be right'],domain:'Patterns & Blind Spots'},
+    {q:'How often do you examine how your past experiences shape your current reactions?',opts:['Rarely — I prefer not to look backwards','Occasionally — when something forces it','Sometimes — I do this but not systematically','Regularly — it\'s a core part of how I understand myself'],domain:'Patterns & Blind Spots'},
+    {q:'How actively are you working on a specific area of personal growth right now?',opts:['I\'m not — growth feels like a concept rather than a practice','Passively — I absorb content but have no real active work','I\'m working on something but with inconsistent effort','Actively — I have a clear growth target and I\'m engaged with it deliberately'],domain:'Growth Orientation'},
+    {q:'When you imagine the person you want to become in 5 years, how specific is that vision?',opts:['Almost no vision — the future is too vague to picture','A vague impression — some qualities but no real detail','Somewhat specific — I have a picture but it shifts','Very specific — I have a clear image I\'m actively building toward'],domain:'Growth Orientation'},
+    {q:'How comfortable are you sitting with not having all the answers about yourself?',opts:['Very uncomfortable — ambiguity about myself is deeply distressing','Uncomfortable — I prefer certainty even if it\'s not accurate','Somewhat comfortable — I\'m learning to hold questions','Comfortable — I see self-uncertainty as part of the process, not a problem'],domain:'Growth Orientation'},
+    {q:'When you\'re in a conflict, how aware are you of your own contribution to it in real time?',opts:['Not at all — I typically see the other person as the problem','Minimally — I might acknowledge contribution after it\'s over','Partially — I can see my part during the conflict sometimes','Clearly — I usually have good awareness of my role as it\'s happening'],domain:'Emotional Awareness'},
+    {q:'How often do you journal, meditate, or use another structured self-reflection practice?',opts:['Never — reflection isn\'t a formal practice for me','Rarely — occasionally in crisis but not consistently','Sometimes — I have a loose practice but it\'s inconsistent','Regularly — I have a consistent reflective practice I protect'],domain:'Growth Orientation'},
+    {q:'How much of your sense of self depends on external validation — approval, praise, recognition?',opts:['Very much — I feel genuinely unstable without it','Significantly — I want to need it less but still rely on it heavily','Moderately — I notice the pull but it doesn\'t control me','Very little — my sense of self is grounded enough to not need constant external input'],domain:'Values & Identity'},
+    {q:'When life is going well, how often do you examine yourself with the same rigor as when things go wrong?',opts:['Almost never — I only self-examine in difficulty','Rarely — ease tends to reduce my self-awareness','Sometimes — I try to maintain it but ease is distracting','Consistently — I don\'t let comfort make me blind'],domain:'Growth Orientation'},
+    {q:'How would you rate the overall accuracy of your self-image — how close is it to how others actually experience you?',opts:['Probably very off — I think there\'s a significant gap','Somewhat off — I suspect meaningful discrepancies','Close — occasionally off but broadly accurate','Very close — I\'ve worked to close the gap between self-perception and reality'],domain:'Patterns & Blind Spots'},
+    {q:'When you tell a story about a conflict or failure, how honestly do you represent your own role?',opts:['I minimize my role significantly without realizing it','I acknowledge my part but tend to frame it generously','I try to be fair but I\'m probably not fully accurate','I represent myself as accurately as I\'d describe someone else'],domain:'Emotional Awareness'}
+  ]
+},
+{
+  id:'connection',title:'The Connection Code',subtitle:'Relationships',icon:'🔗',
+  domains:['Communication & Honesty','Boundaries & Respect','Depth & Investment','Conflict & Repair'],
+  archetypes:[
+    {max:39,label:'The Distant One',desc:'Your relationships are characterized by surface-level engagement, poor communication, or frequent disconnection. Something is keeping you from building the depth most people need. The gap between who you want to be in relationships and where you actually are deserves honest examination.'},
+    {max:54,label:'The Surface Connector',desc:'You maintain relationships but rarely invest in the depth that makes them truly nourishing. Honesty is partial, conflict is avoided, and vulnerability feels risky. You have the capacity for more — but it requires real choices.'},
+    {max:69,label:'The Growing Relator',desc:'You\'re doing the work. Your relationships have real substance, and you\'re developing the emotional intelligence to go deeper. There are clear areas of growth, but the foundation is genuinely solid.'},
+    {max:80,label:'The Deep Connector',desc:'You build and maintain relationships with honesty, depth, and real investment. You handle conflict directly, set clear boundaries, and show up for people consistently. This is relational maturity — rare and worth continuing to protect.'}
+  ],
+  questions:[
+    {q:'When you disagree with someone you care about, how honest are you about your actual position?',opts:['I avoid sharing my real view to prevent conflict','I give a watered-down version to manage the reaction','I share my view but soften it more than I probably should','I share my honest position clearly and with care'],domain:'Communication & Honesty'},
+    {q:'How often do you tell the people you love that you love them — in words, not just actions?',opts:['Rarely or never — I show it but don\'t say it','Occasionally — on birthdays or special moments','Sometimes — but not as often as I actually feel it','Regularly and naturally — it\'s part of how I connect'],domain:'Communication & Honesty'},
+    {q:'When you make a promise or commitment to someone, how reliable are you?',opts:['I often over-promise and under-deliver','I mean it when I say it, but things get in the way frequently','I\'m mostly reliable with occasional lapses I acknowledge','I keep my word consistently — it matters deeply to me'],domain:'Communication & Honesty'},
+    {q:'How comfortable are you telling someone important to you that they\'ve hurt you?',opts:['Very uncomfortable — I hold it in or bring it up indirectly','Uncomfortable — I eventually say something but with a lot of buildup','Somewhat comfortable — I can do it but it takes effort','Comfortable — I say what I need to say clearly and directly'],domain:'Communication & Honesty'},
+    {q:'How clearly do you communicate your needs in close relationships?',opts:['I don\'t — I expect people to figure it out','I hint but don\'t state directly','I mostly communicate them but not always clearly','Directly — I say what I need and own it'],domain:'Communication & Honesty'},
+    {q:'How well do you maintain personal boundaries in your relationships?',opts:['I have very few real boundaries — people regularly cross lines without consequence','I have some boundaries but I don\'t enforce them consistently','My boundaries are fairly clear but occasionally get violated without response','My boundaries are clear and I consistently maintain them without guilt'],domain:'Boundaries & Respect'},
+    {q:'How respectful are you of other people\'s boundaries, even when it\'s inconvenient?',opts:['I sometimes push past limits because I want what I want','I generally respect them but rationalize exceptions for myself','I respect them most of the time but not always','I take others\' limits seriously and don\'t push past them'],domain:'Boundaries & Respect'},
+    {q:'When a relationship repeatedly costs you more than it gives, you...',opts:['Stay and keep absorbing it — I can\'t bring myself to change anything','Complain but take no real action','Distance yourself gradually','Address it directly — either the dynamic changes or the relationship does'],domain:'Boundaries & Respect'},
+    {q:'How much time and attention do you genuinely invest in your most important relationships?',opts:['Minimal — I rely on history without investing in the present','Less than I know I should — it\'s a persistent gap','A reasonable amount — I show up for people meaningfully','Significant — I protect time and attention for the people who matter most'],domain:'Depth & Investment'},
+    {q:'How comfortable are you being genuinely vulnerable with someone you trust?',opts:['Very uncomfortable — I keep my guard up fully','Uncomfortable — I share surface things but not what really matters','Somewhat comfortable — I open up but with significant hesitation','Comfortable — I can be fully honest about what I feel and struggle with'],domain:'Depth & Investment'},
+    {q:'Are your most important relationships growing or declining over time?',opts:['Mostly declining or already disconnected','Stable but stagnant — nothing is getting better','Mostly stable with some areas of real growth','Actively growing — I put in the work and it shows'],domain:'Depth & Investment'},
+    {q:'How often do you check in on the people closest to you — without being prompted?',opts:['Rarely — I wait for them to reach out','Occasionally — on birthdays or when reminded','Sometimes — I think about it more than I act on it','Regularly — I reach out because I genuinely think of them'],domain:'Depth & Investment'},
+    {q:'After a significant conflict with someone you care about, you typically...',opts:['Wait indefinitely for them to come to you','Apologize quickly just to end the discomfort','Have a partial conversation that clears some but not everything','Work through it fully until it\'s actually resolved'],domain:'Conflict & Repair'},
+    {q:'How often do you hold grudges or carry unresolved resentment?',opts:['Often — I don\'t forgive easily','Sometimes — certain things stay with me for long','Occasionally — it happens but I eventually work through it','Rarely — I deal with conflict directly and let things go genuinely'],domain:'Conflict & Repair'},
+    {q:'Can you give a genuine, unqualified apology — without deflecting or adding \'but\'?',opts:['No — I rarely fully apologize','I apologize but almost always justify my side too','Mostly yes — I\'m getting better at it','Yes — I can apologize fully and take responsibility without reservation'],domain:'Conflict & Repair'},
+    {q:'When someone you care about expresses anger toward you, your most common response is...',opts:['Shut down and go silent','Get defensive and counter-attack','Anxiously try to fix it as fast as possible','Stay calm, let them express it, and respond thoughtfully'],domain:'Conflict & Repair'},
+    {q:'How often do you have conversations with people close to you about the relationship itself?',opts:['Never — we just exist in the relationship without discussing it','Rarely — only when there\'s a problem','Occasionally — I try to but it feels awkward','Regularly — meta-conversations about the relationship are healthy and normal to me'],domain:'Communication & Honesty'},
+    {q:'How well do you listen — not just to respond, but to genuinely understand?',opts:['Poorly — I\'m usually formulating my response while the other person talks','Below average — I miss things often','Reasonably well — I listen most of the time','Very well — I ask clarifying questions and focus fully on understanding'],domain:'Communication & Honesty'},
+    {q:'How often do you express genuine appreciation to people who matter to you?',opts:['Rarely — it doesn\'t come naturally','Occasionally — when prompted or on milestones','Sometimes — I mean to more than I do','Regularly — I make it a practice'],domain:'Depth & Investment'},
+    {q:'Overall, how would you describe the quality of your closest relationships right now?',opts:['Chaotic, disconnected, or mostly painful','Surface-level — functional but not deep','Mostly healthy with real areas of growth','Strong — built on honesty, trust, and mutual investment'],domain:'Conflict & Repair'}
+  ]
+},
+{
+  id:'hardtruth',title:'The Hard Truth',subtitle:'Life Audit',icon:'🔦',
+  domains:['Purpose & Direction','Relationships','Fear & Avoidance','Time & Priorities','Self-Honesty & Growth'],
+  archetypes:[
+    {max:39,label:'Sleepwalking',desc:'You are moving through life largely on autopilot. Purpose is unclear, avoidance is high, and honest self-examination has been deferred. The work starts with one clear look.'},
+    {max:54,label:'Aware but Stuck',desc:'You see the gaps clearly but haven\'t fully acted on them. Awareness without movement can become its own trap. You know what needs to change — now it\'s about showing up for it.'},
+    {max:69,label:'On the Move',desc:'You are actively engaging with your life — questioning it, adjusting it, and doing the uncomfortable work. You\'re not where you want to be yet, but you\'re moving in the right direction.'},
+    {max:80,label:'Intentionally Alive',desc:'You are living with clarity, intention, and honest self-examination. You address problems, hold yourself accountable, and build a life that reflects your values — deliberately.'}
+  ],
+  questions:[
+    {q:'You wake up on a Monday with no obligations. How do you spend the day?',opts:['Scroll and rest — I have no real project calling me','Do something fun but unrelated to anything long-term','Work on a personal project I care about','Work toward clear, meaningful long-term goals'],domain:'Purpose & Direction'},
+    {q:'Someone asks what you\'re working toward in life. You feel...',opts:['Uncomfortable — I don\'t have a clear answer','Uncertain — I have vague ideas but nothing solid','Somewhat clear — I have a direction, even if the path isn\'t exact','Very clear — I know exactly what I\'m building and why'],domain:'Purpose & Direction'},
+    {q:'Thinking about your life 10 years from now, you feel...',opts:['Anxious — it\'s too uncertain to think about clearly','Unsure — I haven\'t really mapped it out','Cautiously optimistic — I have a vision but execution is uncertain','Excited and clear — I have a picture I\'m actively building toward'],domain:'Purpose & Direction'},
+    {q:'How often do you make decisions based on your actual values rather than fear or convenience?',opts:['Rarely — fear and habit drive most choices','Sometimes — I\'m aware when I\'m not, but struggle to change it','Often — I catch myself and try to course-correct','Consistently — values-alignment is something I check actively'],domain:'Purpose & Direction'},
+    {q:'A close friend calls in distress late at night. You...',opts:['Ignore it and deal with it tomorrow','Send a quick text but don\'t engage fully','Answer and give partial attention','Give full presence — they called because they need someone'],domain:'Relationships'},
+    {q:'When a relationship in your life becomes clearly toxic or deeply unhealthy, you...',opts:['Stay and complain but don\'t change anything','Think about leaving but can\'t bring yourself to act','Distance yourself gradually without having the hard conversation','Address it directly — either work on it or exit it clearly'],domain:'Relationships'},
+    {q:'How often do you express genuine appreciation to people who matter to you?',opts:['Rarely — it doesn\'t come naturally','Occasionally — when prompted or on milestones','Sometimes — I mean to more than I do','Regularly — I make it a practice'],domain:'Relationships'},
+    {q:'When conflict arises with someone you care about, you usually...',opts:['Avoid it until it either explodes or fades','Talk to others about it instead of addressing it directly','Delay the conversation but eventually have it','Address it directly and with care'],domain:'Relationships'},
+    {q:'When facing a big, risky opportunity you want, you tend to...',opts:['Avoid it — the risk feels too high','Overthink it until the window closes','Partially engage without fully committing','Evaluate it clearly and act despite the fear'],domain:'Fear & Avoidance'},
+    {q:'When difficult emotions arise, you most often...',opts:['Distract yourself heavily — screens, noise, busyness','Stay busy enough that you don\'t have to sit with them','Use habits or substances to dull the feeling','Allow them to surface, process them, and move through them'],domain:'Fear & Avoidance'},
+    {q:'Spending significant time alone, without stimulation, makes you feel...',opts:['Very anxious — I can\'t stay still with my thoughts','Restless — I eventually escape into something','Neutral — I can handle it but it\'s not comfortable','At peace — I\'m comfortable with my own company'],domain:'Fear & Avoidance'},
+    {q:'When you receive direct, accurate criticism about yourself, you...',opts:['Get defensive — even when I know they\'re right','Feel hurt and take it personally for a long time','Reflect on it partially but don\'t always act on it','Reflect honestly and use it as useful data'],domain:'Fear & Avoidance'},
+    {q:'At the end of a typical week, you most often feel...',opts:['Regretful — I didn\'t do what actually mattered','Mild regret — I know I could have done better','Mixed — some things worked, some didn\'t','Fulfilled — I spent my time on what actually counts'],domain:'Time & Priorities'},
+    {q:'When you procrastinate on something important, the real reason is usually...',opts:['Fear — I\'m afraid of failing or being judged','I\'m too busy with other things that feel urgent','I\'m waiting for the right moment or more information','It\'s not actually a real priority — and I need to be honest about that'],domain:'Time & Priorities'},
+    {q:'Your daily screen time is...',opts:['Mostly passive and unproductive','Somewhat useful but with a lot of filler','About half intentional, half habitual','Mostly deliberate — I\'m aware of where my attention goes'],domain:'Time & Priorities'},
+    {q:'If you stripped your life down to only three activities that were truly aligned with your values, you\'d realize...',opts:['Most of what I do now doesn\'t make the list','A lot of filler would get cut and it would be uncomfortable','About half of my life is well-directed','My life is largely already built around what matters most'],domain:'Time & Priorities'},
+    {q:'How honest are you with yourself about your actual flaws and failure patterns?',opts:['I avoid examining them — it\'s uncomfortable','I have partial awareness but rationalize a lot','I\'m aware of them but don\'t fully act on that awareness','I examine them honestly and use them to guide real change'],domain:'Self-Honesty & Growth'},
+    {q:'How often do you genuinely update your beliefs when evidence or experience challenges them?',opts:['Rarely — my worldview is fairly fixed','I was more open years ago but less so now','Occasionally — when something is impossible to ignore','Frequently — I treat being wrong as a chance to get better'],domain:'Self-Honesty & Growth'},
+    {q:'Your approach to personal growth right now is best described as...',opts:['Nonexistent — I\'m not really working on myself','Passive — I absorb things occasionally but without a real system','Inconsistent effort — I go through phases','Structured and deliberate — I have a clear process and stick to it'],domain:'Self-Honesty & Growth'},
+    {q:'When someone accurately points out a blind spot in you, your most honest initial reaction is...',opts:['Rejection — I dismiss it or argue against it','Withdrawal — I shut down and process it alone in a spiral','I consider it but don\'t usually change behavior as a result','I reflect on it seriously and take action if it checks out'],domain:'Self-Honesty & Growth'}
+  ]
+},
+{
+  id:'career',title:'The Purpose Audit',subtitle:'Career',icon:'🎯',
+  domains:['Clarity','Performance','Ambition','Work-Life'],
+  archetypes:[
+    {max:39,label:'Coasting Employee',desc:'You\'re going through the motions with little clarity, ambition, or investment in your professional life. The gap between your potential and current trajectory is significant — and closeable.'},
+    {max:54,label:'Underperforming Potential',desc:'You have ability but aren\'t channeling it deliberately. Direction is fuzzy, performance is inconsistent, and ambition shows up more in theory than action.'},
+    {max:69,label:'Rising Professional',desc:'You\'re building something real — growing your skills, taking more ownership, and becoming more deliberate about your direction. The foundation is solid; execution needs sharpening.'},
+    {max:80,label:'Deliberate Career Builder',desc:'You operate with clarity of purpose, high performance, and intentional ambition. You know what you\'re building, you show up for it daily, and you protect the life that sustains it.'}
+  ],
+  questions:[
+    {q:'How clearly defined is your career vision or professional direction?',opts:['I have no real vision — I take what comes','I have vague ideas but nothing I\'d call a real direction','I have some direction but the path isn\'t fully mapped','I have a clear, specific vision I am actively building toward'],domain:'Clarity'},
+    {q:'How meaningful does your current work feel to you on a day-to-day basis?',opts:['Almost never meaningful — it\'s purely transactional','Rarely — occasional moments but mostly just a job','Sometimes — some parts connect but not the whole','Often — I do work that matters to me and feels worth doing'],domain:'Clarity'},
+    {q:'How well do you know your core professional strengths?',opts:['I don\'t really know what I\'m best at','I have a rough idea but haven\'t tested or articulated it clearly','I know some of my strengths but not all','I know my strengths clearly and deliberately leverage them'],domain:'Clarity'},
+    {q:'How aligned is your current role with your skills, interests, and values?',opts:['Barely aligned — it\'s mostly wrong for me','Loosely aligned — there\'s some overlap but significant mismatch','Somewhat aligned — closer than before but not fully right','Strongly aligned — it fits who I am and what I want to build'],domain:'Clarity'},
+    {q:'How often do you actively think about your career trajectory and direction?',opts:['Almost never — I just do what\'s in front of me','Rarely — only when something forces the conversation','Sometimes — but not with real consistency','Regularly — career thinking is a deliberate part of how I operate'],domain:'Clarity'},
+    {q:'How would you describe your current work habits and daily execution?',opts:['Chaotic — I\'m reactive, disorganized, and inconsistent','Inconsistent — some good days but no reliable system','Generally okay — decent output but room to improve','Strong — I have real systems and execute with discipline'],domain:'Performance'},
+    {q:'When you receive criticism or feedback about your work, your most honest response is...',opts:['Defensive — I feel attacked and push back','Hurt — I take it personally and lose motivation','I accept it intellectually but don\'t always act on it','I use it directly to improve — feedback is data, not judgment'],domain:'Performance'},
+    {q:'How often do you enter states of deep, focused work — free from distraction?',opts:['Almost never — distraction is constant','Rarely — a few times a month at most','Sometimes — a few times a week but not consistently','Daily or near-daily — focused work is something I protect'],domain:'Performance'},
+    {q:'How do you handle your most difficult or unpleasant professional tasks?',opts:['I avoid them as long as possible','I delay significantly before starting','I get to them, but later than I should','I tackle them first — I know discomfort doesn\'t get smaller with delay'],domain:'Performance'},
+    {q:'When something goes wrong at work or in a project, your default is to...',opts:['Blame the situation, others, or circumstances','Partially blame externals while acknowledging some personal role','Take responsibility but not always fully examine what to learn','Take full ownership, examine the failure, and adjust'],domain:'Performance'},
+    {q:'How deliberately are you developing new skills relevant to your goals?',opts:['I\'m not really — I develop only when forced to','Occasionally — when something interesting appears','I have a loose learning habit but no real plan','I have a deliberate, ongoing skill development plan'],domain:'Performance'},
+    {q:'How would you honestly rate your professional ambition right now?',opts:['Low — I want stability more than growth','Inconsistent — ambition comes and goes','Moderate — I want to grow but haven\'t committed fully','High — I\'m actively building toward meaningful advancement'],domain:'Ambition'},
+    {q:'When a career opportunity involves real risk, your honest tendency is to...',opts:['Avoid it — risk feels too threatening','Delay it until the opportunity passes','Approach cautiously — take the opportunity but hedge significantly','Evaluate it clearly and act, accepting that risk is part of growth'],domain:'Ambition'},
+    {q:'How actively do you build and maintain professional relationships?',opts:['I don\'t really network — I wait for things to come to me','Occasionally — when I feel I need something','I maintain existing relationships but rarely expand','Actively — I invest in my network as part of my professional strategy'],domain:'Ambition'},
+    {q:'When you identify a significant skill gap that\'s limiting you, you typically...',opts:['Avoid acknowledging it — it\'s uncomfortable','Acknowledge it but feel stuck about where to start','Try to address it but without a real systematic plan','Develop a specific plan to close it and execute on it'],domain:'Ambition'},
+    {q:'How consistently are you using your strongest skills in your daily work?',opts:['Almost never — my strengths are largely untapped','Partially — some alignment but a lot of mismatch','Mostly — my strengths are in play but not optimized','Fully — I\'ve designed my work to maximize my real strengths'],domain:'Ambition'},
+    {q:'How would you describe your current work-life balance?',opts:['Poor — work dominates or I\'m burned out and disengaged','Constant conflict — one always undermines the other','I manage it but it\'s a recurring tension','Good — I\'ve built clear separation and protect both'],domain:'Work-Life'},
+    {q:'How often do you experience burnout or deep exhaustion from work?',opts:['Constantly — it\'s a permanent state','Frequently — several times a month','Occasionally — a few times a year','Rarely — I\'ve built recovery into my system'],domain:'Work-Life'},
+    {q:'How aligned is your compensation with the value you deliver and your needs?',opts:['Significantly underpaid and I haven\'t acted on it','Underpaid but I\'ve not taken concrete steps to address it','Fair — roughly what I\'d expect for my level','Well-compensated — I\'ve advocated for myself and it shows'],domain:'Work-Life'},
+    {q:'How clearly do you enforce professional boundaries — around time, availability, and workload?',opts:['I have no real boundaries — I\'m always available','My boundaries are weak — people regularly override them','I have some boundaries but they get crossed regularly','Strong — I\'ve communicated them clearly and I protect them'],domain:'Work-Life'}
+  ]
+},
+{
+  id:'weather',title:'The Inner Weather',subtitle:'Mental Wellbeing',icon:'🧠',
+  domains:['Emotional Resilience','Stress & Coping','Thought Patterns','Mental Health Investment'],
+  archetypes:[
+    {max:39,label:'The Fragile Mind',desc:'Your mental landscape is under significant stress. Resilience is low, coping strategies are mostly reactive, and thought patterns tend toward the negative. This is the starting point — not the end.'},
+    {max:54,label:'The Coping Survivor',desc:'You manage — but often barely. You have some tools but don\'t use them consistently, and stress regularly spills into other areas of life. Building real structure here would change a lot.'},
+    {max:69,label:'The Aware Processor',desc:'You have real emotional awareness and a growing toolkit for wellbeing. You\'re not yet fully consistent, but you understand your inner landscape and are actively working it.'},
+    {max:80,label:'The Mentally Grounded',desc:'You possess strong emotional resilience, healthy coping strategies, clear thought patterns, and a proactive investment in your mental health. You build from a stable foundation.'}
+  ],
+  questions:[
+    {q:'When life deals you a significant setback, how do you typically respond?',opts:['I shut down or fall apart for an extended time','I struggle badly but eventually surface without learning much','I grieve appropriately and recover, though it takes longer than I\'d like','I process it fully, extract what I can learn, and move forward with clarity'],domain:'Emotional Resilience'},
+    {q:'How quickly do you recover from emotional distress — arguments, disappointments, failures?',opts:['Very slowly — I carry things for weeks or months','Slowly — it takes significant time and energy','Reasonably — I usually work through it within days','Well — I have real recovery tools and use them consistently'],domain:'Emotional Resilience'},
+    {q:'When you feel overwhelmed, your most common response is to...',opts:['Shut down, withdraw, or numb out completely','Panic or spiral into catastrophic thinking','Push through without addressing the root cause','Acknowledge the overwhelm, identify the trigger, and take small deliberate steps'],domain:'Emotional Resilience'},
+    {q:'How often does anxiety or worry significantly affect your daily functioning?',opts:['Almost daily — it\'s a major limiting force in my life','Frequently — several times a week','Occasionally — it shows up but I manage it','Rarely — I have effective practices that keep anxiety manageable'],domain:'Emotional Resilience'},
+    {q:'How well do you handle situations that are outside your control?',opts:['Very poorly — I fixate on what I can\'t change','Poorly — I know I should let go but find it very hard','Reasonably well — I remind myself of the distinction but still struggle sometimes','Well — I\'ve internalized the distinction between what I can and can\'t control'],domain:'Emotional Resilience'},
+    {q:'Which best describes your primary coping mechanism when under significant stress?',opts:['Avoidance, numbing, or substances','Complaining or venting without resolution','Distraction that provides temporary relief but no real resolution','Active coping — processing, problem-solving, and self-care strategies'],domain:'Stress & Coping'},
+    {q:'How aware are you of your personal stress triggers?',opts:['Not at all — I\'m usually caught off guard','Somewhat — I notice after the fact','Mostly aware but haven\'t fully mapped them','Highly aware — I know my triggers and manage exposure intentionally'],domain:'Stress & Coping'},
+    {q:'How often do you reach a state of genuine rest and mental recovery?',opts:['Almost never — I\'m perpetually stressed','Rarely — once or twice a month','Sometimes — several times a week','Regularly — recovery time is protected and prioritized'],domain:'Stress & Coping'},
+    {q:'Do you have healthy coping strategies you use consistently under stress?',opts:['No — I cope reactively and poorly','I know what to do but rarely apply it','Sometimes but not reliably','Yes — I consistently use a healthy, effective toolkit'],domain:'Stress & Coping'},
+    {q:'How often does stress from one area of life bleed into and affect other areas?',opts:['Almost always — stress is contagious across all areas','Often — it disrupts multiple areas regularly','Sometimes — I contain it partially','Rarely — I\'ve built separation between life areas'],domain:'Stress & Coping'},
+    {q:'How often do you engage in harsh or persistent negative self-talk?',opts:['Constantly — my inner critic is loud and relentless','Frequently — it\'s a significant source of suffering','Occasionally — I notice it and work to counter it','Rarely — I\'ve developed a more compassionate inner voice'],domain:'Thought Patterns'},
+    {q:'How often does your thinking spiral into worst-case scenarios?',opts:['Very often — catastrophizing is a default mode','Often — it takes conscious effort to interrupt','Sometimes — I catch it and redirect','Rarely — I stay reasonably grounded in what\'s actually likely'],domain:'Thought Patterns'},
+    {q:'How clearly can you distinguish between useful thoughts and mental noise?',opts:['I can\'t — I believe most of my thoughts','I know the theory but struggle to apply it in the moment','Sometimes — on good days I catch the noise','Well — I have real metacognitive awareness and use it'],domain:'Thought Patterns'},
+    {q:'When you make a mistake or fail at something, how do you respond to yourself?',opts:['Shame and extended rumination','Harsh self-criticism that persists for a long time','Disappointment that fades, with partial learning','Self-compassion followed by clear corrective action'],domain:'Thought Patterns'},
+    {q:'How often do you compare yourself to others in ways that damage your self-image?',opts:['Constantly — I measure myself against others habitually','Frequently — it\'s a regular source of inadequacy','Sometimes — I notice it but don\'t always stop it','Rarely — I\'ve built a stable enough sense of self to minimize it'],domain:'Thought Patterns'},
+    {q:'Do you have an active, consistent mental health practice (therapy, meditation, journaling, etc.)?',opts:['No — I have nothing structured in place','I\'ve tried things but nothing has stuck','Occasional practices that I don\'t do consistently','Yes — I have a consistent, meaningful mental health practice'],domain:'Mental Health Investment'},
+    {q:'How comfortable are you discussing your mental health with people you trust?',opts:['Very uncomfortable — I keep it entirely private','Uncomfortable — I acknowledge it superficially at best','Somewhat comfortable — I open up selectively','Comfortable — I talk about it honestly with trusted people'],domain:'Mental Health Investment'},
+    {q:'How proactively do you protect your mental health — before crises, not just during them?',opts:['Only in crisis — I react when things get bad','I think about prevention but rarely act on it','I take some preventive steps but not consistently','Proactively and intentionally — maintenance is part of my regular life'],domain:'Mental Health Investment'},
+    {q:'How well do you sleep and how does its quality affect your mental state?',opts:['Poor sleep is chronic and significantly affects my functioning','Inconsistent — sometimes good, often not, and I feel the impact','Generally okay — sleep is usually adequate','Strong sleep hygiene — I protect it and it supports my mental health'],domain:'Mental Health Investment'},
+    {q:'Overall, how would you honestly rate your mental wellbeing right now?',opts:['Struggling significantly — this is a difficult period','Below average — I\'m managing but not thriving','Average — stable but not at my best','Good to strong — I feel grounded, capable, and generally well'],domain:'Mental Health Investment'}
+  ]
+}
+];
+
+/* ════════════════════════════════════════════════════════════════
+   APP STATE & INIT
+════════════════════════════════════════════════════════════════ */
+let activeQuiz=null, lastQuizIdx=null, advTimer=null;
+let currentUser=null;
+let obCurrent=0;
+
+const AFFIRMATIONS=[
+  'You are not behind. You are exactly where your journey requires you to be.',
+  'Self-awareness is not a destination. It\'s the courage to keep looking.',
+  'Growth is quiet. Let it happen.',
+  'Clarity comes from honesty, not speed.',
+  'You\'re building something real — keep going.',
+  'The version of you you\'re afraid to examine needs your attention most.',
+  'Progress is not linear. Showing up is enough.',
+  'Knowing yourself is the beginning of all wisdom.',
+  'The hard truth is also the one that sets you free.',
+  'Small consistent honesty is more powerful than occasional grand insights.'
+];
+let affIdx=Math.floor(Math.random()*AFFIRMATIONS.length);
+
+/* ════════════════════════════════════════════════════════════════
+   PWA / SERVICE WORKER
+════════════════════════════════════════════════════════════════ */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(reg=>{
+    console.log('SW registered');
+  }).catch(e=>console.warn('SW error',e));
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SPLASH → ONBOARDING / AUTH
+════════════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded',()=>{
+  // After splash animation ends, decide flow
+  setTimeout(()=>{
+    document.getElementById('splash').classList.add('gone');
+    const hasAccount = localStorage.getItem('la_account');
+    const isLoggedIn = localStorage.getItem('la_session');
+    const sawOnboarding = localStorage.getItem('la_onboarded');
+
+    if(isLoggedIn && hasAccount){
+      bootApp();
+    } else if(!sawOnboarding){
+      document.getElementById('onboarding').classList.remove('hidden');
+    } else {
+      document.getElementById('auth').classList.remove('hidden');
+    }
+  },2100);
+});
+
+/* ════════════════════════════════════════════════════════════════
+   ONBOARDING
+════════════════════════════════════════════════════════════════ */
+function obNext(){
+  if(obCurrent < 2){
+    document.getElementById('ob'+obCurrent).classList.add('left');
+    document.getElementById('ob'+obCurrent).classList.remove('active');
+    document.getElementById('dot'+obCurrent).classList.remove('active');
+    obCurrent++;
+    document.getElementById('ob'+obCurrent).classList.add('active');
+    document.getElementById('dot'+obCurrent).classList.add('active');
+    if(obCurrent===2) document.getElementById('obNext').textContent='Get Started';
+  } else {
+    skipOnboarding();
+  }
+}
+function skipOnboarding(){
+  localStorage.setItem('la_onboarded','1');
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('auth').classList.remove('hidden');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   AUTH
+════════════════════════════════════════════════════════════════ */
+function switchAuthTab(t){
+  document.getElementById('tabLogin').classList.toggle('active', t==='login');
+  document.getElementById('tabSignup').classList.toggle('active', t==='signup');
+  document.getElementById('loginForm').classList.toggle('hidden', t!=='login');
+  document.getElementById('signupForm').classList.toggle('hidden', t!=='signup');
+}
+
+function doSignup(){
+  const name=document.getElementById('signupName').value.trim();
+  const email=document.getElementById('signupEmail').value.trim();
+  const pass=document.getElementById('signupPass').value;
+  const err=document.getElementById('signupErr');
+  if(!name){err.textContent='Please enter your name.';return;}
+  if(!email.includes('@')){err.textContent='Enter a valid email.';return;}
+  if(pass.length<6){err.textContent='Password must be at least 6 characters.';return;}
+  const account={name,email,password:btoa(pass),createdAt:new Date().toISOString()};
+  localStorage.setItem('la_account',JSON.stringify(account));
+  localStorage.setItem('la_session','1');
+  err.textContent='';
+  bootApp();
+}
+
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const err=document.getElementById('loginErr');
+  const account=JSON.parse(localStorage.getItem('la_account')||'null');
+  if(!account){err.textContent='No account found. Please sign up first.';return;}
+  if(account.email!==email||account.password!==btoa(pass)){err.textContent='Incorrect email or password.';return;}
+  localStorage.setItem('la_session','1');
+  err.textContent='';
+  bootApp();
+}
+
+function doSignOut(){
+  if(!confirm('Sign out of LifeApp?')) return;
+  localStorage.removeItem('la_session');
+  location.reload();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BOOT
+════════════════════════════════════════════════════════════════ */
+function bootApp(){
+  document.getElementById('auth').classList.add('hidden');
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('main').classList.add('show');
+
+  currentUser=JSON.parse(localStorage.getItem('la_account')||'{}');
+  const initials=(currentUser.name||'?')[0].toUpperCase();
+  document.getElementById('userAvatar').textContent=initials;
+
+  refreshDashboard();
+  scheduleReminderIfEnabled();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════════════════ */
+function navigate(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const el=document.getElementById('view-'+view);
+  if(el) el.classList.add('active');
+  const tab=document.querySelector(`.nav-tab[data-view="${view}"]`);
+  if(tab) tab.classList.add('active');
+  if(view==='dashboard') refreshDashboard();
+  if(view==='quiz-hub') renderQuizHub();
+  if(view==='journal') renderJournalList();
+  if(view==='progress') renderHistory();
+  if(view==='settings') renderSettings();
+  window.scrollTo(0,0);
+}
+
+function showWhatsNew(){
+  localStorage.setItem('la_saw_wn','1');
+  document.getElementById('notifDot').classList.remove('show');
+  navigate('whatsnew');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════════════════════════════ */
+function refreshDashboard(){
+  // Greeting
+  const h=new Date().getHours();
+  const w=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  document.getElementById('dashGreeting').textContent=w;
+  document.getElementById('dashName').textContent=currentUser?.name||'there';
+
+  // Streak
+  updateStreak();
+
+  // Stats
+  const quizzesDone=QUIZZES.filter(q=>localStorage.getItem('la_quiz_'+q.id)).length;
+  const journals=JSON.parse(localStorage.getItem('la_journals')||'[]').length;
+  const streak=parseInt(localStorage.getItem('la_streak')||'1');
+  document.getElementById('statQuizzes').textContent=quizzesDone;
+  document.getElementById('statJournals').textContent=journals;
+  document.getElementById('statStreak').textContent=streak;
+  document.getElementById('dashStreak').innerHTML=
+    streak>=7?`🔥 ${streak}-day streak`:streak>1?`🔥 ${streak} days`:' 🌱 Day 1';
+
+  // Affirmation
+  document.getElementById('affirmText').textContent=AFFIRMATIONS[affIdx];
+
+  // Mood
+  const today=new Date().toDateString();
+  const moods=JSON.parse(localStorage.getItem('la_moods')||'[]');
+  const todayMood=moods.find(m=>new Date(m.time).toDateString()===today);
+  document.querySelectorAll('.mood-btn').forEach(b=>{
+    b.classList.toggle('chosen', todayMood && b.dataset.mood===todayMood.mood);
+  });
+
+  // What's new badge
+  if(!localStorage.getItem('la_saw_wn'))
+    document.getElementById('notifDot').classList.add('show');
+}
+
+function updateStreak(){
+  const today=new Date().toDateString();
+  const last=localStorage.getItem('la_lastActive');
+  let streak=parseInt(localStorage.getItem('la_streak')||'0');
+  if(last!==today){
+    const yest=new Date(); yest.setDate(yest.getDate()-1);
+    streak=(last===yest.toDateString())?streak+1:1;
+    localStorage.setItem('la_streak',streak);
+    localStorage.setItem('la_lastActive',today);
+  }
+}
+
+function nextAffirm(){
+  const el=document.getElementById('affirmText');
+  if(!el)return;
+  el.style.opacity='0';
+  setTimeout(()=>{affIdx=(affIdx+1)%AFFIRMATIONS.length;el.textContent=AFFIRMATIONS[affIdx];el.style.opacity='1';},300);
+}
+
+function logMood(mood,emoji){
+  const today=new Date().toDateString();
+  const moods=JSON.parse(localStorage.getItem('la_moods')||'[]');
+  const filtered=moods.filter(m=>new Date(m.time).toDateString()!==today);
+  filtered.push({mood,emoji,time:new Date().toISOString()});
+  localStorage.setItem('la_moods',JSON.stringify(filtered));
+  document.querySelectorAll('.mood-btn').forEach(b=>{
+    b.classList.toggle('chosen', b.dataset.mood===mood);
+  });
+  addHistory(`${emoji} Mood logged: ${mood}`);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ASK AI
+════════════════════════════════════════════════════════════════ */
+async function askAI(prompt){
+  const input=document.getElementById('aiInput');
+  const btn=document.getElementById('aiSendBtn');
+  const resp=document.getElementById('aiResponse');
+
+  if(!prompt) prompt=input.value.trim();
+  if(!prompt) return;
+
+  input.value='';
+  btn.disabled=true;
+  resp.classList.add('open');
+  resp.innerHTML='<div class="ai-typing"><span></span><span></span><span></span></div>';
+
+  // Build context
+  const quizSummary=QUIZZES.map(q=>{
+    const r=JSON.parse(localStorage.getItem('la_quiz_'+q.id)||'null');
+    if(!r) return null;
+    return `${q.subtitle}: ${r.archetype} (${r.total}/${r.domainMax?Object.values(r.domainMax).reduce((a,b)=>a+b,0):80})`;
+  }).filter(Boolean).join(', ');
+  const userName=currentUser?.name||'the user';
+  const journals=JSON.parse(localStorage.getItem('la_journals')||'[]').length;
+
+  const systemPrompt=`You are a warm, insightful personal development coach for LifeApp — a self-awareness platform. The user's name is ${userName}. ${quizSummary?`Their quiz results: ${quizSummary}.`:''} They have ${journals} journal entries. Give concise, direct, actionable guidance (2-4 sentences max). Be honest, not just affirming. Speak warmly but substantively.`;
+
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:systemPrompt,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.find(c=>c.type==='text')?.text||'Sorry, I couldn\'t get a response. Please try again.';
+    resp.innerHTML=text.split('\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+  } catch(e){
+    resp.innerHTML='<p style="color:var(--muted)">Couldn\'t connect to AI. Check your internet and try again.</p>';
+  }
+  btn.disabled=false;
+}
+
+function sendAI(){
+  const v=document.getElementById('aiInput').value.trim();
+  if(v) askAI(v);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   QUIZ HUB
+════════════════════════════════════════════════════════════════ */
+function renderQuizHub(){
+  const el=document.getElementById('quizGrid');
+  el.innerHTML=QUIZZES.map((q,i)=>{
+    const saved=JSON.parse(localStorage.getItem('la_quiz_'+q.id)||'null');
+    return`<div class="qhc${saved?' done':''}" onclick="startQuiz(${i})">
+      <div class="qhc-top">
+        <div class="qhc-icon">${q.icon}</div>
+        <div class="qhc-info">
+          <div class="qhc-title">${q.title}</div>
+          <div class="qhc-sub">${q.subtitle} · 20 questions</div>
+        </div>
+        ${saved?`<div class="qhc-badge">${saved.archetype}</div>`:`<div class="qhc-badge new">New</div>`}
+      </div>
+      <div class="qhc-footer">
+        <div class="qhc-score">${saved?`Last score: <span>${saved.total}/80</span>`:'Not taken yet'}</div>
+        <button class="qhc-btn${saved?' retake':''}">${saved?'↺ Retake':'→ Start'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   QUIZ ENGINE
+════════════════════════════════════════════════════════════════ */
+function startQuiz(idx){
+  lastQuizIdx=idx;
+  activeQuiz={quizIndex:idx, currentQ:0, answers:new Array(20).fill(-1)};
+  renderQuestion();
+  navigate('quiz');
+}
+
+function renderQuestion(){
+  if(!activeQuiz) return;
+  const quiz=QUIZZES[activeQuiz.quizIndex];
+  const cur=activeQuiz.currentQ;
+  const q=quiz.questions[cur];
+  const total=quiz.questions.length;
+
+  document.getElementById('qCurr').textContent=cur+1;
+  document.getElementById('qTotal').textContent=total;
+  document.getElementById('qProgress').style.width=((cur+1)/total*100)+'%';
+  document.getElementById('qDomain').textContent=q.domain;
+  document.getElementById('qText').textContent=q.q;
+
+  document.getElementById('qOpts').innerHTML=q.opts.map((opt,i)=>
+    `<button class="opt-btn${activeQuiz.answers[cur]===i?' selected':''}" onclick="selectAns(${i})">${opt}</button>`
+  ).join('');
+
+  document.getElementById('qPrevBtn').style.opacity=cur===0?'0.3':'1';
+  document.getElementById('qPrevBtn').disabled=cur===0;
+  document.getElementById('qNextBtn').textContent=cur===total-1?'Finish':'Next ›';
+}
+
+function selectAns(idx){
+  if(!activeQuiz) return;
+  activeQuiz.answers[activeQuiz.currentQ]=idx;
+  document.querySelectorAll('.opt-btn').forEach((b,i)=>b.classList.toggle('selected',i===idx));
+  if(advTimer) clearTimeout(advTimer);
+  advTimer=setTimeout(()=>{
+    if(activeQuiz.currentQ<QUIZZES[activeQuiz.quizIndex].questions.length-1) quizNext();
+    else finishQuiz();
+  },420);
+}
+
+function quizPrev(){
+  if(!activeQuiz||activeQuiz.currentQ===0) return;
+  if(advTimer){clearTimeout(advTimer);advTimer=null;}
+  activeQuiz.currentQ--;
+  renderQuestion();
+}
+
+function quizNext(){
+  if(!activeQuiz) return;
+  if(advTimer){clearTimeout(advTimer);advTimer=null;}
+  if(activeQuiz.answers[activeQuiz.currentQ]===-1) return;
+  const total=QUIZZES[activeQuiz.quizIndex].questions.length;
+  if(activeQuiz.currentQ<total-1){activeQuiz.currentQ++;renderQuestion();}
+  else finishQuiz();
+}
+
+function finishQuiz(){
+  const quiz=QUIZZES[activeQuiz.quizIndex];
+  const domainScores={}, domainMax={}, domainCounts={};
+  quiz.domains.forEach(d=>{domainScores[d]=0;domainMax[d]=0;domainCounts[d]=0;});
+  quiz.questions.forEach((q,i)=>{
+    const ans=activeQuiz.answers[i];
+    if(ans>=0){domainScores[q.domain]+=ans+1;domainCounts[q.domain]++;}
+    domainMax[q.domain]=(domainMax[q.domain]||0)+4;
+  });
+  const total=Object.values(domainScores).reduce((a,b)=>a+b,0);
+  const archType=quiz.archetypes.find(a=>total<=a.max)||quiz.archetypes[quiz.archetypes.length-1];
+
+  // Strong / weak
+  const pcts=quiz.domains.map(d=>({d,p:domainScores[d]/domainMax[d]}));
+  pcts.sort((a,b)=>b.p-a.p);
+  const strong=pcts[0].d, weak=pcts[pcts.length-1].d;
+
+  const result={total,archetype:archType.label,archetypeDesc:archType.desc,domainScores,domainMax,strong,weak,date:new Date().toISOString()};
+  localStorage.setItem('la_quiz_'+quiz.id,JSON.stringify(result));
+  addHistory(`${quiz.icon} Completed ${quiz.title} — ${archType.label}`);
+  showResults(quiz,result);
+}
+
+function showResults(quiz,result){
+  document.getElementById('resEmoji').textContent=quiz.icon;
+  document.getElementById('resQuizSub').textContent=quiz.subtitle;
+  document.getElementById('resArchetype').textContent=result.archetype;
+  document.getElementById('resDesc').textContent=result.archetypeDesc;
+  document.getElementById('resScore').innerHTML=`${result.total} <small>/ ${Object.values(result.domainMax).reduce((a,b)=>a+b,0)}</small>`;
+
+  document.getElementById('resDomains').innerHTML=quiz.domains.map(d=>{
+    const s=result.domainScores[d]||0, m=result.domainMax[d];
+    const pct=Math.round((s/m)*100);
+    return`<div class="dom-row">
+      <div class="dom-header"><span class="dom-name">${d}</span><span class="dom-score">${s}/${m}</span></div>
+      <div class="dom-track"><div class="dom-fill" style="width:0" data-pct="${pct}"></div></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('resTags').innerHTML=
+    `<div class="res-tag strong">💪 ${result.strong}</div>`+
+    `<div class="res-tag weak">🔧 ${result.weak}</div>`;
+
+  navigate('results');
+  setTimeout(()=>{
+    document.querySelectorAll('.dom-fill').forEach(b=>b.style.width=b.dataset.pct+'%');
+  },160);
+}
+
+function retakeQuiz(){
+  if(lastQuizIdx!==null) startQuiz(lastQuizIdx);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   JOURNAL
+════════════════════════════════════════════════════════════════ */
+function saveJournal(){
+  const text=document.getElementById('journalText').value.trim();
+  if(!text) return;
+  const journals=JSON.parse(localStorage.getItem('la_journals')||'[]');
+  journals.push({text,time:new Date().toISOString()});
+  localStorage.setItem('la_journals',JSON.stringify(journals));
+  document.getElementById('journalText').value='';
+  document.getElementById('jCharCount').textContent='0/2000';
+  addHistory('📝 Journal entry added');
+  renderJournalList();
+}
+
+function renderJournalList(){
+  const journals=JSON.parse(localStorage.getItem('la_journals')||'[]');
+  const el=document.getElementById('journalList');
+  if(!el) return;
+  if(!journals.length){el.innerHTML='<div class="empty"><div class="empty-icon">📖</div>No entries yet. Write your first reflection above.</div>';return;}
+  el.innerHTML=[...journals].reverse().map(j=>`
+    <div class="j-entry">
+      <div class="j-entry-date">${new Date(j.time).toLocaleString()}</div>
+      <div class="j-entry-text">${j.text.slice(0,240)}${j.text.length>240?'…':''}</div>
+    </div>`).join('');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HISTORY
+════════════════════════════════════════════════════════════════ */
+function addHistory(text){
+  const h=JSON.parse(localStorage.getItem('la_history')||'[]');
+  h.push({text,time:new Date().toISOString()});
+  localStorage.setItem('la_history',JSON.stringify(h));
+}
+
+function renderHistory(){
+  const h=JSON.parse(localStorage.getItem('la_history')||'[]');
+  const el=document.getElementById('historyList');
+  if(!el) return;
+  if(!h.length){el.innerHTML='<div class="empty"><div class="empty-icon">📊</div>No activity yet. Start by taking a quiz or writing a journal entry.</div>';return;}
+  el.innerHTML=[...h].reverse().map(item=>`
+    <div class="h-item">
+      <div class="h-dot"></div>
+      <div><div class="h-text">${item.text}</div><div class="h-time">${new Date(item.time).toLocaleString()}</div></div>
+    </div>`).join('');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SETTINGS
+════════════════════════════════════════════════════════════════ */
+function renderSettings(){
+  const acct=JSON.parse(localStorage.getItem('la_account')||'{}');
+  document.getElementById('settingsName').textContent=acct.name||'—';
+  document.getElementById('settingsEmail').textContent=acct.email||'—';
+  const notifOn=localStorage.getItem('la_notif')==='1';
+  document.getElementById('notifToggle').checked=notifOn;
+  if(notifOn) document.getElementById('timePicker').classList.add('show');
+  const t=localStorage.getItem('la_notif_time')||'08:00';
+  document.getElementById('reminderTime').value=t;
+}
+
+function toggleReminder(on){
+  if(on){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted'){
+        localStorage.setItem('la_notif','1');
+        document.getElementById('timePicker').classList.add('show');
+        scheduleReminderIfEnabled();
+      } else {
+        document.getElementById('notifToggle').checked=false;
+        alert('Please allow notifications in your browser settings to enable reminders.');
+      }
+    });
+  } else {
+    localStorage.removeItem('la_notif');
+    document.getElementById('timePicker').classList.remove('show');
+    cancelReminder();
+  }
+}
+
+function updateReminderTime(val){
+  localStorage.setItem('la_notif_time',val);
+  scheduleReminderIfEnabled();
+}
+
+function scheduleReminderIfEnabled(){
+  if(localStorage.getItem('la_notif')!=='1') return;
+  const time=localStorage.getItem('la_notif_time')||'08:00';
+  const msg=`Hey ${currentUser?.name||'there'} — time for your daily LifeApp check-in. How are you doing today? 🌱`;
+  navigator.serviceWorker.ready.then(sw=>{
+    sw.active?.postMessage({type:'SCHEDULE_REMINDER',time,message:msg});
+  });
+}
+
+function cancelReminder(){
+  navigator.serviceWorker.ready.then(sw=>{
+    sw.active?.postMessage({type:'CANCEL_REMINDER'});
+  });
+}
+
+function confirmClearData(){
+  if(confirm('This will permanently delete all your quiz results, journal entries, and progress. This cannot be undone. Continue?')){
+    const keys=['la_streak','la_lastActive','la_moods','la_journals','la_history','la_notif','la_notif_time','la_saw_wn'];
+    QUIZZES.forEach(q=>keys.push('la_quiz_'+q.id));
+    keys.forEach(k=>localStorage.removeItem(k));
+    alert('All data has been cleared.');
+    refreshDashboard();
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MODALS
+════════════════════════════════════════════════════════════════ */
+function showPrivacy(){ openModal('privacyModal') }
+function openModal(id){ document.getElementById(id).classList.add('open') }
+function closeModal(id){ document.getElementById(id).classList.remove('open') }
+</script>
+</body>
+</html>

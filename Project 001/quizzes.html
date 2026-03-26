@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeApp Quizzes</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="quizzes.css">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+      
+      <div class="header-left">
+        <h1>LifeApp Quizzes</h1>
+        <div class="subtitle">Choose a quiz to begin your journey</div>
+      </div>
+
+      <div class="header-right">
+        <a href="index.html" class="back-btn" title="Go to Dashboard">
+          <i class="fas fa-arrow-left"></i>
+          <span>Back</span>
+        </a>
+
+        <a href="index.html" class="home-btn" title="Go to Dashboard">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- QUIZ GRID -->
+    <div class="quiz-grid">
+
+      <div class="quiz-card" data-quiz="mirror-test.html" role="button" tabindex="0">
+        <div class="quiz-icon">
+          <i class="fas fa-user"></i>
+        </div>
+        <h2>The Mirror Test</h2>
+        <p>Self-Awareness Quiz</p>
+      </div>
+
+      <div class="quiz-card" data-quiz="connection.html" role="button" tabindex="0">
+        <div class="quiz-icon">
+          <i class="fas fa-link"></i>
+        </div>
+        <h2>The Connection Code</h2>
+        <p>Relationships Quiz</p>
+      </div>
+
+      <div class="quiz-card" data-quiz="hardtruth.html" role="button" tabindex="0">
+        <div class="quiz-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h2>The Hard Truth</h2>
+        <p>Life Audit</p>
+      </div>
+
+      <div class="quiz-card" data-quiz="career.html" role="button" tabindex="0">
+        <div class="quiz-icon">
+          <i class="fas fa-briefcase"></i>
+        </div>
+        <h2>The Purpose Audit</h2>
+        <p>Career Quiz</p>
+      </div>
+
+      <div class="quiz-card" data-quiz="mental-wellbeing.html" role="button" tabindex="0">
+        <div class="quiz-icon">
+          <i class="fas fa-brain"></i>
+        </div>
+        <h2>The Inner Weather</h2>
+        <p>Mental Wellbeing Quiz</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    const cards = document.querySelectorAll('.quiz-card');
+
+    cards.forEach(card => {
+      const navigate = () => {
+        const quizUrl = card.dataset.quiz;
+        localStorage.setItem('currentQuiz', quizUrl);
+        window.location.href = quizUrl;
+      };
+
+      card.addEventListener('click', navigate);
+
+      // Keyboard accessibility (Enter key)
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          navigate();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

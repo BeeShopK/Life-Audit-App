@@ -1,0 +1,68 @@
+/* General Layout */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    background: linear-gradient(90deg, rgb(0,0,0), rgb(128,0,64));
+    background-size: 200% 200%;
+    animation: maroonWave 20s ease infinite;
+}
+
+@keyframes maroonWave {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header h1 { font-size: 28px; }
+.header button {
+    padding: 8px 15px;
+    background-color: #222;
+    border: 1px solid #444;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.25s ease, background-color 0.25s ease;
+}
+.header button:hover {
+    transform: scale(1.08);
+    background-color: #ff4da6;
+    border-color: #ffb3d9;
+}
+
+/* Quiz List */
+.quiz-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.quiz-card {
+    background-color: rgba(34,34,34,0.8);
+    padding: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.quiz-card:hover {
+    transform: scale(1.05);
+    background-color: rgba(255, 77, 166, 0.8);
+}
+
+.quiz-card h2 { margin-top: 0; margin-bottom: 10px; }
+.quiz-card p { margin: 0; font-size: 14px; color: #ffd6eb; }

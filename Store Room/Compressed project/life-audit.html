@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Audit Quiz</title>
+<link rel="stylesheet" href="life-audit.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Life Audit Quiz</h1>
+    <button id="backHome"><i class="fas fa-home"></i></button>
+  </div>
+
+  <div class="quiz-wrap">
+    <div id="qNumber"></div>
+    <div id="qText"></div>
+    <div id="optionsGrid"></div>
+  </div>
+
+  <div class="results-card" id="resultsCard" style="display:none;">
+    <h2>Your Results</h2>
+    <p id="archetype"></p>
+    <button onclick="location.reload()">Retake Quiz</button>
+  </div>
+
+</div>
+
+<script src="life-audit.js"></script>
+<script>
+document.getElementById('backHome').addEventListener('click', () => {
+  window.location.href = 'quizzes.html';
+});
+</script>
+</body>
+</html>

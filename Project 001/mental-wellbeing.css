@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #121212;
+  --card: #181818;
+  --pri: #1DB954;
+  --pri-lt: #1ed760;
+  --pri-glow: rgba(29,185,84,0.25);
+  --text: #ffffff;
+  --muted: #b3b3b3;
+  --faint: #535353;
+  --border: rgba(255,255,255,0.08);
+  --r: 12px;
+  --r-sm: 6px;
+  --ease: cubic-bezier(0.3,0,0,1);
+}
+
+body { 
+  font-family: 'Outfit', sans-serif; 
+  background: var(--bg); 
+  color: var(--text); 
+  margin:0; 
+  padding:0; 
+}
+
+/* ===== HEADER ===== */
+.header {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.header-right {
+  display: flex;
+  justify-content: flex-start;
+  padding: 10px 20px;
+}
+
+/* ===== BACK BUTTON ===== */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--pri);
+  background: linear-gradient(135deg, #555, #35af16);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px var(--pri-glow);
+}
+
+/* ===== QUIZ WRAPPER ===== */
+.quiz-wrap { 
+  max-width: 680px; 
+  margin: 0 auto; 
+  padding: 0 16px;
+}
+
+/* ===== PROGRESS ===== */
+#progress {
+  text-align: center;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+/* ===== QUESTION ===== */
+.question {
+  background: var(--card);
+  padding: 24px;
+  border-radius: var(--r);
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* ===== OPTIONS GRID ===== */
+.options-grid { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
+}
+
+.option-btn { 
+  display: flex; 
+  align-items: flex-start; 
+  gap: 12px; 
+  padding: 14px 18px; 
+  background: rgba(255,255,255,.025); 
+  border: 1px solid rgba(255,255,255,.07); 
+  border-radius: var(--r-sm); 
+  cursor: pointer; 
+  transition: all .22s var(--ease); 
+  color: var(--muted);
+}
+
+.option-btn:hover { 
+  border-color: var(--pri-lt); 
+  background: rgba(29,185,84,.07); 
+  color: var(--text);
+}
+
+.option-btn.selected { 
+  border-color: var(--pri-lt); 
+  background: rgba(29,185,84,.12); 
+  color: var(--text); 
+  transform: scale(1.02); 
+  box-shadow: 0 0 8px var(--pri-glow);
+}
+
+/* ===== NAVIGATION BUTTONS (IMPORTANT FIX) ===== */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.nav button {
+  flex: 1;
+  background-color: var(--pri);
+  color: var(--text);
+  border: none;
+  padding: 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s var(--ease);
+}
+
+.nav button:hover {
+  background-color: var(--pri-lt);
+  box-shadow: 0 0 12px var(--pri-glow);
+  transform: scale(1.02);
+}
+
+/* ===== RESULTS ===== */
+.results {
+  max-width: 680px;
+  margin: 40px auto;
+  padding: 30px;
+  background: var(--card);
+  border-radius: var(--r);
+  text-align: center;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== REVIEW ITEMS ===== */
+.review-item {
+  background: rgba(255,255,255,0.03);
+  padding: 14px;
+  margin-bottom: 12px;
+  border-radius: var(--r-sm);
+  text-align: left;
+}
+
+.review-item button {
+  margin-top: 8px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: var(--pri);
+  color: white;
+  cursor: pointer;
+}
+
+.review-item button:hover {
+  background: var(--pri-lt);
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 600px) {
+  .nav {
+    flex-direction: row;
+  }
+
+  .nav button {
+    font-size: 14px;
+  }
+}

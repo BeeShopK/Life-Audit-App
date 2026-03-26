@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeApp Quizzes</title>
+
+  <!-- MAIN APP CSS (important for consistency) -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- QUIZ PAGE CSS -->
+  <link rel="stylesheet" href="quizzes.css">
+
+  <!-- FONT AWESOME -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- SCRIPT -->
+  <script defer src="quizzes.js"></script>
+</head>
+
+<body>
+
+  <!-- MAIN WRAPPER -->
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-left">
+        <h1>🧠 LifeApp Quizzes</h1>
+        <p class="subtitle">Choose a domain and start your self-discovery</p>
+      </div>
+
+      <button id="backHome" class="btn-home">
+        <i class="fas fa-home"></i> Dashboard
+      </button>
+    </header>
+
+    <!-- QUIZ GRID -->
+    <section class="quiz-grid">
+
+      <!-- MIRROR -->
+      <div class="quiz-card" data-quiz="quiz-mirror.html">
+        <div class="quiz-icon">🪞</div>
+        <h2>The Mirror Test</h2>
+        <p>Self-Awareness Quiz</p>
+        <span class="quiz-time">⏱ 5–7 min · 8 questions</span>
+      </div>
+
+      <!-- CONNECTION -->
+      <div class="quiz-card" data-quiz="quiz-connection.html">
+        <div class="quiz-icon">💞</div>
+        <h2>The Connection Code</h2>
+        <p>Relationships Quiz</p>
+        <span class="quiz-time">⏱ 5–7 min · 8 questions</span>
+      </div>
+
+      <!-- HARD TRUTH (FIXED LINK BUG) -->
+      <div class="quiz-card" data-quiz="quiz-hardtruth.html">
+        <div class="quiz-icon">🧾</div>
+        <h2>The Hard Truth</h2>
+        <p>Life Audit</p>
+        <span class="quiz-time">⏱ 5–7 min · 8 questions</span>
+      </div>
+
+      <!-- PURPOSE -->
+      <div class="quiz-card" data-quiz="quiz-purpose.html">
+        <div class="quiz-icon">🚀</div>
+        <h2>The Purpose Audit</h2>
+        <p>Career & Meaning Quiz</p>
+        <span class="quiz-time">⏱ 5–7 min · 8 questions</span>
+      </div>
+
+      <!-- WEATHER -->
+      <div class="quiz-card" data-quiz="quiz-weather.html">
+        <div class="quiz-icon">🌤️</div>
+        <h2>The Inner Weather</h2>
+        <p>Mental Wellbeing Quiz</p>
+        <span class="quiz-time">⏱ 5–7 min · 8 questions</span>
+      </div>
+
+    </section>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz 2: Relationships</title>
+<link rel="stylesheet" href="connections.css">
+</head>
+<body class="quiz-page">
+
+<div class="main-content">
+  <div class="page-header">
+    <h1>Relationships <em>Quiz</em></h1>
+    <p>How Healthy Are Your Connections?</p>
+    <p>20 Questions · 4 Domains · 4 Archetypes</p>
+  </div>
+
+  <div class="instructions">
+    <p>Click the choice that best reflects how you genuinely think or behave.</p>
+    <p>Be honest — not aspirational. Your real answers give the most useful results.</p>
+  </div>
+
+  <!-- Quiz Progress -->
+  <div class="quiz-progress-outer">
+    <div class="quiz-progress-track">
+      <div class="quiz-progress-fill" id="quizProgress"></div>
+      <span id="mickeyIcon">🐭</span>
+    </div>
+    <div class="quiz-progress-text" id="progressText">0 / 20</div>
+  </div>
+
+  <!-- Question Card -->
+  <div class="quiz-wrap">
+    <div class="question-card">
+      <div class="q-num">Question <span id="qNumber">1</span></div>
+      <div class="q-text" id="qText">Loading...</div>
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-card" id="resultsCard" style="display:none;">
+    <div class="results-score-ring">
+      <svg width="120" height="120">
+        <circle class="ring-bg" cx="60" cy="60" r="54"></circle>
+        <circle class="ring-fill" cx="60" cy="60" r="54" stroke-dasharray="339.292" stroke-dashoffset="339.292"></circle>
+      </svg>
+    </div>
+    <div class="results-label">Your Score</div>
+    <div class="results-archetype" id="archetype"></div>
+    <div class="domain-breakdown" id="domainBreakdown"></div>
+    <div class="reflection-notes">
+      <p>My strongest domain is: <span id="strongDomain"></span></p>
+      <p>The domain I most need to work on: <span id="weakDomain"></span></p>
+    </div>
+  </div>
+</div>
+
+<script src="connection.js"></script>
+</body>
+</html>
